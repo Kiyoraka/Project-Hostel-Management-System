@@ -397,6 +397,22 @@ textarea:focus-visible,
 /* ---- Print ---- */
 @media print {
   body { background: #fff; }
-  .no-print, .sidebar, .topbar, .bottom-tab-bar,
-  .modal-backdrop, .drawer-backdrop, .toast-stack { display: none !important; }
+  .no-print, .sidebar, .topbar, .d-topbar, .d-tabs,
+  .modal-backdrop, .drawer-backdrop, .toast-stack,
+  .site-header, .site-footer, .cta-band, .hero__cta, .filter-bar { display: none !important; }
+  .dashboard-content, .d-content, body.dashboard-body { display: block !important; }
+  body.dashboard-body { grid-template-columns: 1fr !important; }
+  .card, .table-wrap { box-shadow: none !important; border-color: #ddd !important; page-break-inside: avoid; }
+  .badge { border: 1px solid #999; }
+  a:after { content: ""; }
+}
+
+/* ---- High contrast ---- */
+@media (prefers-contrast: more) {
+  .input, .select, .textarea, .card, .table-wrap { border-width: 2px; }
+}
+
+/* ---- aria-current for active nav ---- */
+[aria-current="page"] {
+  font-weight: 700;
 }

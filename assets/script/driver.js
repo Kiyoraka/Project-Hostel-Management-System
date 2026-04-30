@@ -34,7 +34,12 @@
     const items = document.querySelectorAll('.d-tab');
     function sync() {
       const hash = window.location.hash.replace(/^#/, '') || '/';
-      items.forEach(it => it.classList.toggle('is-active', it.dataset.route === hash));
+      items.forEach(it => {
+        const isActive = it.dataset.route === hash;
+        it.classList.toggle('is-active', isActive);
+        if (isActive) it.setAttribute('aria-current', 'page');
+        else it.removeAttribute('aria-current');
+      });
     }
     window.addEventListener('hashchange', sync);
     sync();
