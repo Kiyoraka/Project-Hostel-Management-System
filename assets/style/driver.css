@@ -1,0 +1,435 @@
+/* =====================================================================
+   driver.css — Driver mobile-only "native app" feel
+   ===================================================================== */
+
+/* ---- Mobile gate ---- */
+.mobile-gate {
+  display: none;
+  min-height: 100vh;
+  min-height: 100svh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-light) 100%);
+  color: #fff;
+  text-align: center;
+}
+.mobile-gate__card {
+  background: var(--surface);
+  color: var(--ink-900);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 420px;
+  box-shadow: var(--shadow-modal);
+}
+.mobile-gate__icon {
+  font-size: 72px;
+  color: var(--brand-primary);
+  margin-bottom: 16px;
+}
+.mobile-gate__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.mobile-gate__sub {
+  color: var(--ink-500);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  body.driver-app .driver-shell { display: none; }
+  body.driver-app .mobile-gate { display: flex; }
+}
+
+/* ---- Driver shell ---- */
+body.driver-app {
+  background: var(--surface-soft);
+  overscroll-behavior-y: contain;
+}
+.driver-shell {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  min-height: 100svh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--surface-soft);
+  position: relative;
+}
+
+/* ---- Driver topbar ---- */
+.d-topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--ink-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.d-topbar__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-900);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.d-topbar__back {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-input);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-700);
+}
+.d-topbar__bell {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-input);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-700);
+}
+.d-topbar__bell-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+
+/* ---- Driver content ---- */
+.d-content {
+  padding: 16px;
+  padding-bottom: calc(var(--bottom-tab-height) + env(safe-area-inset-bottom, 0px) + 16px);
+  overflow-y: auto;
+}
+
+/* ---- Bottom tab bar ---- */
+.d-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-top: 1px solid var(--ink-200);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: calc(var(--bottom-tab-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  z-index: 10;
+}
+.d-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-500);
+  padding: 8px 4px;
+  min-height: 44px;
+  transition: color var(--t-fast);
+}
+.d-tab i { font-size: 18px; }
+.d-tab:hover { color: var(--ink-700); }
+.d-tab.is-active { color: var(--brand-primary); }
+
+/* ---- Driver page header ---- */
+.d-page-h {
+  margin-bottom: 16px;
+}
+.d-page-h__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink-900);
+}
+.d-page-h__sub {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin-top: 2px;
+}
+
+/* ---- Pickup card ---- */
+.pickup-card {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+}
+.pickup-card--now {
+  border-color: var(--brand-primary);
+  background: linear-gradient(135deg, var(--brand-tint) 0%, var(--surface) 60%);
+}
+.pickup-card__time {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.pickup-card__class {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ink-900);
+  margin-bottom: 4px;
+}
+.pickup-card__loc {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin-bottom: 10px;
+}
+.pickup-card__students {
+  list-style: none;
+  margin-bottom: 12px;
+}
+.pickup-card__students li {
+  font-size: 13px;
+  padding: 4px 0;
+  color: var(--ink-700);
+}
+.pickup-card__students i {
+  color: var(--brand-primary);
+  margin-right: 6px;
+}
+
+.section-divider {
+  margin: 24px 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---- Scanner ---- */
+.scanner-stage {
+  position: relative;
+  background: #000;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  aspect-ratio: 1;
+  margin-bottom: 16px;
+}
+.scanner-stage video,
+.scanner-stage canvas { width: 100%; height: 100%; object-fit: cover; }
+.scanner-frame {
+  position: absolute;
+  inset: 18%;
+  border: 3px solid #fff;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32);
+}
+.scanner-frame::before,
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--brand-primary);
+  border-style: solid;
+}
+.scanner-frame::before {
+  top: -3px;
+  left: -3px;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 16px;
+}
+.scanner-frame::after {
+  bottom: -3px;
+  right: -3px;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 16px;
+}
+.scanner-context {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-card);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--ink-700);
+  margin-bottom: 12px;
+}
+
+/* ---- Scan result overlays ---- */
+.scan-result {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.scan-result--valid   { background: rgba(16, 185, 129, 0.96); }
+.scan-result--invalid { background: rgba(239, 68, 68, 0.96); }
+.scan-result__card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+.scan-result__icon {
+  font-size: 56px;
+  margin-bottom: 12px;
+}
+.scan-result--valid   .scan-result__icon { color: var(--success); }
+.scan-result--invalid .scan-result__icon { color: var(--danger); }
+.scan-result__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--ink-900);
+}
+.scan-result__detail {
+  font-size: 14px;
+  color: var(--ink-500);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.scan-result__actions { display: flex; gap: 10px; justify-content: center; }
+
+/* ---- Schedule list ---- */
+.dr-day {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 16px 0 8px;
+  padding-left: 4px;
+}
+.dr-day--today {
+  color: var(--brand-primary);
+}
+.dr-row {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-input);
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.dr-row__time {
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.dr-row__class {
+  color: var(--ink-700);
+  flex: 1;
+  margin: 0 12px;
+}
+.dr-row__loc {
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+/* ---- Settings rows ---- */
+.dr-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--ink-200);
+  cursor: pointer;
+  transition: background var(--t-fast);
+  min-height: 44px;
+}
+.dr-setting:hover { background: var(--surface-soft); }
+.dr-setting:first-child { border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card); }
+.dr-setting:last-child { border-bottom: 0; border-bottom-left-radius: var(--radius-card); border-bottom-right-radius: var(--radius-card); }
+.dr-setting-group {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-card);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.dr-setting__label { font-size: 14px; color: var(--ink-900); }
+.dr-setting__value { font-size: 13px; color: var(--ink-500); }
+.dr-setting__chevron { color: var(--ink-300); }
+
+/* Toggle switch */
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  background: var(--ink-300);
+  border-radius: 12px;
+  transition: background var(--t-fast);
+  cursor: pointer;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--t-fast);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.toggle.is-on { background: var(--brand-primary); }
+.toggle.is-on::after { transform: translateX(18px); }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--ink-100) 0%, var(--ink-200) 50%, var(--ink-100) 100%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-input);
+}
+@keyframes skel-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Driver profile card */
+.dr-profile {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-light) 100%);
+  color: #fff;
+  border-radius: var(--radius-card);
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.dr-profile__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+}
+.dr-profile__name { font-size: 16px; font-weight: 800; }
+.dr-profile__sub  { font-size: 13px; color: rgba(255,255,255,0.85); }

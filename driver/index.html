@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+  <title>Driver - Hostel Pickup</title>
+  <meta name="theme-color" content="#0EA5E9">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+  <link rel="stylesheet" href="../assets/style/tokens.css">
+  <link rel="stylesheet" href="../assets/style/base.css">
+  <link rel="stylesheet" href="../assets/style/driver.css">
+
+  <script defer src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+  <script defer src="../assets/script/auth.js"></script>
+  <script defer src="../assets/script/store.js"></script>
+  <script defer src="../assets/script/seed.js"></script>
+  <script defer src="../assets/script/ui.js"></script>
+  <script defer src="../assets/script/driver-today.js"></script>
+  <script defer src="../assets/script/driver-scan.js"></script>
+  <script defer src="../assets/script/driver-schedule.js"></script>
+  <script defer src="../assets/script/driver-settings.js"></script>
+  <script defer src="../assets/script/driver.js"></script>
+</head>
+<body class="driver-app">
+
+  <div class="mobile-gate">
+    <div class="mobile-gate__card">
+      <div class="mobile-gate__icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <div class="mobile-gate__title">Open on your mobile device</div>
+      <p class="mobile-gate__sub">
+        The Driver app is optimized for mobile only. Open this URL on your phone, or
+        narrow your browser window below 768px (use DevTools mobile emulation).
+      </p>
+      <div class="mt-4"><a href="../index.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to landing</a></div>
+    </div>
+  </div>
+
+  <div class="driver-shell">
+
+    <header class="d-topbar">
+      <div class="d-topbar__title">
+        <i class="fa-solid fa-van-shuttle" style="color: var(--brand-primary);"></i>
+        <span data-page-title>Driver</span>
+      </div>
+      <button type="button" class="d-topbar__bell" aria-label="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span class="d-topbar__bell-dot"></span>
+      </button>
+    </header>
+
+    <main class="d-content" id="app-content">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Loading...</h3></div>
+    </main>
+
+    <nav class="d-tabs" aria-label="Driver tabs">
+      <a href="#/" class="d-tab" data-route="/">
+        <i class="fa-solid fa-house"></i><span>Today</span>
+      </a>
+      <a href="#/scan" class="d-tab" data-route="/scan">
+        <i class="fa-solid fa-qrcode"></i><span>Scan QR</span>
+      </a>
+      <a href="#/schedule" class="d-tab" data-route="/schedule">
+        <i class="fa-solid fa-calendar-days"></i><span>Schedule</span>
+      </a>
+      <a href="#/settings" class="d-tab" data-route="/settings">
+        <i class="fa-solid fa-user"></i><span>Me</span>
+      </a>
+    </nav>
+
+  </div>
+
+</body>
+</html>
