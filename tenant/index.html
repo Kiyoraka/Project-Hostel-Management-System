@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Hostel - Student Dashboard</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+  <link rel="stylesheet" href="../assets/style/tokens.css">
+  <link rel="stylesheet" href="../assets/style/base.css">
+  <link rel="stylesheet" href="../assets/style/dashboard.css">
+  <link rel="stylesheet" href="../assets/style/tenant.css">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script defer src="../assets/script/auth.js"></script>
+  <script defer src="../assets/script/store.js"></script>
+  <script defer src="../assets/script/seed.js"></script>
+  <script defer src="../assets/script/ui.js"></script>
+  <script defer src="../assets/script/tenant-home.js"></script>
+  <script defer src="../assets/script/tenant-room.js"></script>
+  <script defer src="../assets/script/tenant-schedule.js"></script>
+  <script defer src="../assets/script/tenant-maintenance.js"></script>
+  <script defer src="../assets/script/tenant-payments.js"></script>
+  <script defer src="../assets/script/tenant-settings.js"></script>
+  <script defer src="../assets/script/tenant.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <aside class="sidebar" aria-label="Tenant navigation">
+    <div class="sidebar__logo">
+      <i class="fa-solid fa-building" aria-hidden="true"></i>
+      <span>My Hostel</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__section">
+        <div class="sidebar__section-title">My Hostel</div>
+        <a class="sidebar__nav-item" href="#/" data-route="/">
+          <i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/room" data-route="/room">
+          <i class="fa-solid fa-bed" aria-hidden="true"></i><span>My Room</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/schedule" data-route="/schedule">
+          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Class Schedule</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/maintenance" data-route="/maintenance">
+          <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Maintenance</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/payments" data-route="/payments">
+          <i class="fa-solid fa-credit-card" aria-hidden="true"></i><span>Payments</span>
+        </a>
+      </div>
+
+      <div class="sidebar__divider"></div>
+
+      <div class="sidebar__section">
+        <a class="sidebar__nav-item" href="#/settings" data-route="/settings">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__user-avatar" data-user-avatar>AF</div>
+        <div class="sidebar__user-meta">
+          <div class="sidebar__user-name" data-user-name>Ahmad Faiz</div>
+          <div class="sidebar__user-role">Student</div>
+        </div>
+      </div>
+      <button type="button" class="sidebar__logout" data-logout>
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar__left">
+      <button type="button" class="topbar__toggle" data-sidebar-toggle aria-label="Toggle sidebar">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+      <div class="topbar__title" data-page-title>Home</div>
+    </div>
+    <div class="topbar__right">
+      <button type="button" class="topbar__bell" aria-label="Notifications">
+        <i class="fa-solid fa-bell" aria-hidden="true"></i>
+        <span class="topbar__bell-dot"></span>
+      </button>
+      <div class="topbar__user" data-user-menu>
+        <div class="topbar__user-avatar" data-user-avatar>AF</div>
+        <span class="topbar__user-name" data-user-name>Ahmad Faiz</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-content" id="app-content">
+    <div class="empty-state">
+      <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+      <h3>Loading...</h3>
+    </div>
+  </main>
+
+</body>
+</html>

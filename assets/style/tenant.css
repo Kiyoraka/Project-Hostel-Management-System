@@ -1,0 +1,182 @@
+/* =====================================================================
+   tenant.css — Tenant (student) dashboard specific styles
+   ===================================================================== */
+
+.welcome-card {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-light) 100%);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+  color: #fff;
+  margin-bottom: var(--space-6);
+}
+.welcome-card__title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.welcome-card__sub {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+}
+
+.dashboard-card {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--t-base), border-color var(--t-base);
+}
+.dashboard-card:hover {
+  border-color: var(--brand-tint-deep);
+  box-shadow: var(--shadow-card-hover);
+}
+.dashboard-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dashboard-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-500);
+}
+.dashboard-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-input);
+  background: var(--brand-tint);
+  color: var(--brand-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.dashboard-card__value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+.dashboard-card__sub {
+  font-size: 13px;
+  color: var(--ink-500);
+}
+.dashboard-card__cta {
+  margin-top: auto;
+}
+
+/* ---- Room photo + details ---- */
+.room-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+.room-photo {
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, var(--brand-tint) 0%, var(--brand-primary-light) 100%);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 80px;
+}
+@media (max-width: 768px) {
+  .room-detail { grid-template-columns: 1fr; }
+}
+
+/* ---- Schedule "NOW" badge ---- */
+.now-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--success);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  animation: now-pulse 1.4s ease-in-out infinite;
+}
+@keyframes now-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+/* ---- QR display ---- */
+.qr-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  min-height: 70vh;
+}
+.qr-card {
+  background: var(--surface);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-8);
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+.qr-card__qr {
+  width: 280px;
+  height: 280px;
+  margin: 0 auto var(--space-5);
+  background: #fff;
+  padding: 14px;
+  border-radius: var(--radius-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qr-card__qr canvas,
+.qr-card__qr img { width: 100%; height: 100%; }
+.qr-card__class {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink-900);
+  margin-bottom: 6px;
+}
+.qr-card__pickup {
+  font-size: 14px;
+  color: var(--ink-500);
+  margin-bottom: var(--space-4);
+}
+.qr-card__expires {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--brand-tint);
+  color: var(--brand-primary-dark);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--space-4);
+}
+.qr-card__expires.is-expiring {
+  background: var(--warning-tint);
+  color: var(--warning);
+}
+.qr-card__expires.is-expired {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+.qr-card__hint {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin-bottom: var(--space-5);
+}
+.qr-card__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
