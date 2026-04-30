@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel - Modern Student Living</title>
+  <meta name="description" content="A modern student hostel with comfortable rooms, class pickup service, quick repairs, and easy online payments.">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+  <link rel="stylesheet" href="assets/style/tokens.css">
+  <link rel="stylesheet" href="assets/style/base.css">
+  <link rel="stylesheet" href="assets/style/landing.css">
+
+  <script defer src="assets/script/auth.js"></script>
+  <script defer src="assets/script/store.js"></script>
+  <script defer src="assets/script/seed.js"></script>
+  <script defer src="assets/script/ui.js"></script>
+  <script defer src="assets/script/landing.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header__inner container">
+      <a href="#top" class="site-logo" aria-label="Hostel home">
+        <i class="fa-solid fa-building" aria-hidden="true"></i>
+        <span>Hostel</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#features">Why Us</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div class="site-header__cta">
+        <button type="button" class="btn btn-primary" data-open-login>
+          Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero" id="home">
+      <div class="hero__inner container">
+        <div class="hero__copy">
+          <span class="hero__eyebrow">For students, by students</span>
+          <h1 class="hero__title">
+            Modern Student Hostel.<br>
+            Living, Learning,<br>
+            <span class="hero__title-accent">Riding to Class.</span>
+          </h1>
+          <p class="hero__subtitle">
+            Comfortable rooms, hassle-free rent, on-call maintenance, and a class pickup
+            service that takes you to lectures on time, every time.
+          </p>
+          <div class="hero__cta">
+            <button type="button" class="btn btn-primary btn-lg" data-open-login>
+              Get Started <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg" data-open-login>
+              Login
+            </button>
+          </div>
+          <ul class="hero__trust" aria-label="What our hostel offers">
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> 24/7 access</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Free WiFi</li>
+            <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Auto pickup</li>
+          </ul>
+        </div>
+        <div class="hero__visual" aria-hidden="true">
+          <div class="hero__visual-card">
+            <div class="hero__visual-icon"><i class="fa-solid fa-house-chimney"></i></div>
+            <div class="hero__visual-text">
+              <div class="hero__visual-title">Block A - Floor 2</div>
+              <div class="hero__visual-sub">Twin room - RM 700/mo</div>
+            </div>
+          </div>
+          <div class="hero__visual-card hero__visual-card--alt">
+            <div class="hero__visual-icon"><i class="fa-solid fa-van-shuttle"></i></div>
+            <div class="hero__visual-text">
+              <div class="hero__visual-title">Pickup at 14:30</div>
+              <div class="hero__visual-sub">Software Engineering class</div>
+            </div>
+          </div>
+          <div class="hero__visual-card hero__visual-card--qr">
+            <div class="hero__visual-icon"><i class="fa-solid fa-qrcode"></i></div>
+            <div class="hero__visual-text">
+              <div class="hero__visual-title">QR ready</div>
+              <div class="hero__visual-sub">Expires in 11:42</div>
+            </div>
+          </div>
+          <div class="hero__visual-blob"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="container">
+        <h2 class="section-heading">Why live here?</h2>
+        <p class="section-subheading">
+          Everything a student needs under one roof - and a ride to class when the alarm fails.
+        </p>
+
+        <div class="features__grid">
+          <article class="feature-card">
+            <div class="feature-card__icon"><i class="fa-solid fa-bed" aria-hidden="true"></i></div>
+            <h3 class="feature-card__title">Comfy Rooms</h3>
+            <p class="feature-card__desc">
+              Air-conditioned single and twin rooms with study desks, fast WiFi, and en-suite bathrooms.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon"><i class="fa-solid fa-van-shuttle" aria-hidden="true"></i></div>
+            <h3 class="feature-card__title">Class Pickup</h3>
+            <p class="feature-card__desc">
+              Schedule your classes once - we generate a fresh QR code before each pickup window. No more chasing rides.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon"><i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i></div>
+            <h3 class="feature-card__title">Quick Repairs</h3>
+            <p class="feature-card__desc">
+              Snap a photo, file a maintenance report in seconds. Track status from new to resolved.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-card__icon"><i class="fa-solid fa-credit-card" aria-hidden="true"></i></div>
+            <h3 class="feature-card__title">Easy Payment</h3>
+            <p class="feature-card__desc">
+              Pay rent online with FPX, card, or bank transfer. Auto-pay available so you never miss a deadline.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-band" id="contact">
+      <div class="container">
+        <div class="cta-band__inner">
+          <h2 class="cta-band__title">Ready to call this place home?</h2>
+          <p class="cta-band__subtitle">Sign in with your demo credentials to explore admin, student, and driver views.</p>
+          <button type="button" class="btn btn-primary btn-lg" data-open-login>
+            Login <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <div class="site-footer__brand">
+        <i class="fa-solid fa-building" aria-hidden="true"></i> Hostel
+      </div>
+      <div class="site-footer__legal">
+        <span>(c) 2026 Hostel Management System</span>
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
