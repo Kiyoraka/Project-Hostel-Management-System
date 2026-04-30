@@ -48,7 +48,7 @@
           <div class="dashboard-card__value">${ui.escapeHtml(nextNice)}</div>
           <div class="dashboard-card__sub">${nextSchedule ? 'Pickup: ' + ui.escapeHtml(nextSchedule.pickupLocation) : 'Add a class to your schedule first'}</div>
           <div class="dashboard-card__cta">
-            <a href="#/schedule" class="btn btn-primary btn-sm">Show QR <i class="fa-solid fa-qrcode"></i></a>
+            <a href="#/schedule" class="btn btn-primary btn-sm">Scan to board <i class="fa-solid fa-qrcode"></i></a>
           </div>
         </div>
 

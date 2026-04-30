@@ -15,7 +15,7 @@
 
     ui.hashRouter({
       '/':         () => callSection('Today',     window.driverTodayInit),
-      '/scan':     () => callSection('Scan QR',   window.driverScanInit),
+      '/scan':     () => callSection('My Pickup QR', window.driverScanInit),
       '/schedule': () => callSection('Schedule',  window.driverScheduleInit),
       '/settings': () => callSection('Driver',    window.driverSettingsInit)
     }, '/');

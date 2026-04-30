@@ -102,15 +102,18 @@ The login modal has clickable demo-login buttons that auto-fill these credential
 
 ## Centerpiece — Time-bound QR Pickup Flow
 
-The system's defining feature. The flow:
+The system's defining feature. **Direction: driver shows / student scans** — like a venue check-in. The driver is the pickup authority; the student verifies they're boarding the right ride.
 
 1. **Student schedules a class** (day, start time, class, pickup location)
-2. **15 minutes before class start**, the schedule row shows a pulsing **NOW** badge
-3. **Student taps Show QR** → app generates a fresh QR with a 10-minute validity window:
+2. **15 minutes before class start**, both apps light up:
+   - Driver's **My QR** tab activates and renders a fresh QR with a 10-minute validity window
+   - Student's schedule row shows a pulsing **NOW** badge with a **Scan to Board** button
+3. The QR encodes:
    ```json
    {
-     "studentId":  "STU-2026-0007",
+     "driverId":   "U003",
      "scheduleId": "SCH-Tue-1430",
+     "classId":    "CLS-SE",
      "classDate":  "2026-04-30",
      "issuedAt":   1714476120000,
      "expiresAt":  1714476720000,
@@ -118,15 +121,19 @@ The system's defining feature. The flow:
    }
    ```
    The `sig` is a SHA-256 hash of the rest of the payload — tamper detection.
-4. **Driver opens scan tab** → camera starts
-5. **Driver aims at the QR** → 5 validation rules fire:
+4. **Student taps Scan to Board** → camera starts
+5. **Student aims at driver's QR** → 5 validation rules fire:
    1. JSON parses cleanly
    2. Signature matches the hash of the payload
    3. Now is between `issuedAt` and `expiresAt`
-   4. `scheduleId` matches an active pickup window today
-   5. `studentId` matches the schedule's expected student
-6. **All five pass** → green "Valid" overlay → driver taps **Confirm Pickup** → logged to `pickups` store
-7. **Any one fails** → red "Invalid" overlay with the specific reason
+   4. `scheduleId` belongs to ME and is for today with an open pickup window
+   5. `driverId` is a registered driver
+   6. (bonus) Student hasn't already boarded this pickup today
+6. **All pass** → green "You're on board" overlay → student taps **Confirm boarding** → logged to `pickups` store
+7. **Any fail** → red "Cannot board" overlay with the specific reason
+8. **Driver sees boarded students appear live** in the QR view as students confirm
+
+Each driver QR is a single, time-bound, signed token shared by all students of that pickup window.
 
 ## Browser Support
 
