@@ -399,13 +399,22 @@ textarea.field__input { resize: vertical; min-height: 80px; }
 
 @media (max-width: 900px) {
 
-  /* ---- Hide sidebar entirely on mobile (bottom nav covers all routes) ---- */
+  /* ---- Collapse the dashboard grid: drop the sidebar column entirely ---- */
+  body.dashboard-body,
+  body.dashboard-body.is-collapsed {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "content";
+  }
   .sidebar { display: none; }
 
   /* Reset any desktop layout that pushes content right of sidebar */
   .topbar { left: 0; }
-  .dashboard-content { margin-left: 0; }
-  body.is-collapsed .dashboard-content { margin-left: 0; }
+  .dashboard-content {
+    margin-left: 0;
+    padding: var(--space-3);
+  }
 
   /* Hide desktop sidebar collapse toggle on mobile (no sidebar to toggle) */
   .topbar__toggle { display: none; }
