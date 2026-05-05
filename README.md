@@ -123,13 +123,28 @@ When the admin dashboard opens at narrow widths (phone, tablet portrait, or DevT
 
 No action needed to switch modes — resize the browser below 900px wide or use Chrome DevTools mobile emulation and the layout transitions automatically.
 
-### Student / Tenant (desktop, left sidebar)
+### Student / Tenant (responsive — desktop sidebar OR mobile native bottom nav)
+
+The tenant dashboard adapts to viewport like admin. Above 900px wide it shows the desktop left-sidebar; below 900px it switches to a 5-tab bottom nav (Home / Room / Schedule / Maint / Pay) with the topbar dropdown handling Settings + Logout.
+
 - **Home** — welcome card + 4 action cards (My Room / Next Class Pickup / Rent Status / Open Maintenance)
 - **My Room** — full room details with photo placeholder + amenities + roommate info
-- **Class Schedule** — list of classes with NOW pulse-badge during pickup window, **Show QR** opens a large white QR card with countdown timer
+- **Class Schedule** — list of classes with NOW pulse-badge during pickup window, **Scan to Board** opens the camera scanner that verifies the driver's QR
 - **Maintenance** — submit report form (auto-filled room, category, urgency, photos), my reports table with status badges
 - **Payments** — current month + next month cards, Pay Now modal (FPX/Card/Bank picker), full payment history
 - **Settings** — Profile / Password / Payment Methods (saved cards + auto-pay toggle)
+
+#### Mobile Native Mode (tenant viewport <900px)
+
+Same architecture as admin's mobile mode (no hamburger, no sidebar drawer — bottom nav only). Each of the 6 sections has its own mobile render:
+- **Home** — time-aware greeting + hero card showing **Next Class Pickup** with full-width Scan to Board CTA + 2-col stats (My Room / Rent) + Quick Actions list-card with chevron-row navigation to Room/Schedule/Maintenance/Payments
+- **My Room** — greeting (Block + Floor + Type) + centered hero card with bed icon and Monthly Rate + Room Details list-card (icon-prefixed rows for location/type/move-in/lease-end/roommate/quiet-hours) + Amenities 2-col chip grid
+- **Class Schedule** — greeting + active-window callout hero (only when pickup is open) + 2-col stats (Total Classes / Boarded Today) + full-width [+ Add Class] CTA + My Classes list-card with day/time/location and inline Scan to Board / Boarded badges per row. Scanner stage uses the existing camera viewport unchanged
+- **Maintenance** — greeting + 2-col stats (Open / Resolved) + full-width [+ Submit Report] CTA + My Reports list-card with status badges. Tap row opens detail drawer
+- **Payments** — greeting + hero showing current month rent with Paid/Outstanding state and Pay Now CTA + 2-col stats (Next Month / Total Paid) + Pay Early secondary button + Payment History list-card
+- **Settings** — greeting + scroll-snap tab bar + active tab name as section label + full-width stacked form (Profile / Password / Payment Methods)
+
+Topbar dropdown (Settings + Logout) and bottom nav swap-to-top-on-active-tap behave identically to admin.
 
 ### Driver (mobile-only, bottom tab bar — native app feel)
 - **Today** — current pickup window with student list + Scan QR Now button, upcoming pickups, completed today
