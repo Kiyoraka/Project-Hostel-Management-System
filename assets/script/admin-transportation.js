@@ -6,6 +6,8 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   const TABS = [
     { id: 'overview', label: 'Overview',       icon: 'fa-gauge' },
     { id: 'schedule', label: 'Trip Schedule',  icon: 'fa-calendar-days' },
@@ -49,6 +51,7 @@
     }
 
     function renderOverview(panel) {
+      if (isMobile()) return renderMobileOverview(panel);
       const pickups = store.readAll('pickups') || [];
       const schedules = store.readAll('schedules') || [];
       const completed = pickups.filter(p => p.status === 'completed').length;
@@ -78,7 +81,62 @@
       `;
     }
 
+    function renderMobileOverview(panel) {
+      const pickups = store.readAll('pickups') || [];
+      const schedules = store.readAll('schedules') || [];
+      const completed = pickups.filter(p => p.status === 'completed').length;
+      const pending = Math.max(0, schedules.length - completed);
+      const drivers = auth.listUsers().filter(u => u.role === 'driver').length;
+      const total = schedules.length;
+
+      panel.innerHTML = `
+        <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+          <div class="m-greeting__hello">Transportation</div>
+          <div class="m-greeting__date">${total} trips scheduled today</div>
+        </div>
+
+        <div class="m-stats-row" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Trips Today</div>
+            <div class="m-stat-card__value">${total}</div>
+            <div class="m-stat-card__delta">scheduled</div>
+          </div>
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Completed</div>
+            <div class="m-stat-card__value">${completed}</div>
+            <div class="m-stat-card__delta">finished</div>
+          </div>
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Pending</div>
+            <div class="m-stat-card__value">${pending}</div>
+            <div class="m-stat-card__delta">remaining</div>
+          </div>
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Active Drivers</div>
+            <div class="m-stat-card__value">${drivers}</div>
+            <div class="m-stat-card__delta">on duty</div>
+          </div>
+        </div>
+
+        <div class="m-section-label">Today's Activity <span class="m-carousel-hint">${pickups.length}</span></div>
+        <div class="m-list-card">
+          ${pickups.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-van-shuttle activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.classLabel)} pickup</span>
+                <span class="m-list-card__meta">${p.studentCount} student${p.studentCount === 1 ? '' : 's'} &middot; ${ui.escapeHtml(p.status)}</span>
+              </div>
+              <span class="m-list-card__time">${ui.escapeHtml(p.date)}</span>
+            </div>
+          `).join('')}
+          ${pickups.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500);">No activity yet today</div>' : ''}
+        </div>
+      `;
+    }
+
     function renderSchedule(panel) {
+      if (isMobile()) return renderMobileSchedule(panel);
       const schedules = store.readAll('schedules') || [];
       const driver = auth.listUsers().find(u => u.role === 'driver') || { name: 'Pak Lim' };
       panel.innerHTML = `
@@ -119,7 +177,37 @@
       `;
     }
 
+    function renderMobileSchedule(panel) {
+      const schedules = store.readAll('schedules') || [];
+      const driver = auth.listUsers().find(u => u.role === 'driver') || { name: 'Pak Lim' };
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; recurring schedule editor ships in Phase 2.</span>
+          </div>
+        </div>
+
+        <div class="m-section-label">Trips This Week <span class="m-carousel-hint">${schedules.length}</span></div>
+        <div class="m-list-card">
+          ${schedules.map(s => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-clock activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(s.day)} &middot; ${ui.escapeHtml(s.startTime)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(s.classLabel || s.classId || '-')} &middot; ${ui.escapeHtml(s.pickupLocation)}</span>
+                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(driver.name)}</span>
+              </div>
+              <span class="badge badge--success" style="font-size: 10px; flex-shrink: 0;">ACTIVE</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function renderStatus(panel) {
+      if (isMobile()) return renderMobileStatus(panel);
       const pickups = store.readAll('pickups') || [];
       panel.innerHTML = `
         <div class="card card-pad stub-section">
@@ -154,6 +242,45 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      `;
+    }
+
+    function renderMobileStatus(panel) {
+      const pickups = store.readAll('pickups') || [];
+      const extras = [
+        { id: 'PK-3', classLabel: 'Software Engineering', driverId: 'U003', studentCount: 1, status: 'in_progress', date: 'Today' },
+        { id: 'PK-4', classLabel: 'Database Systems',     driverId: 'U003', studentCount: 2, status: 'pending',     date: 'Today' }
+      ];
+      const all = [...pickups, ...extras];
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; live GPS telemetry ships in Phase 2.</span>
+          </div>
+        </div>
+
+        <button class="btn btn-ghost" type="button" style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+          <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>&nbsp;Refresh
+        </button>
+
+        <div class="m-section-label">Live Trip Reports <span class="m-carousel-hint">${all.length}</span></div>
+        <div class="m-list-card">
+          ${all.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-van-shuttle activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.id)} &middot; ${ui.escapeHtml(p.classLabel)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(p.driverId)} &middot; ${p.studentCount} student${p.studentCount === 1 ? '' : 's'}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span class="badge badge--${p.status === 'completed' ? 'success' : p.status === 'in_progress' ? 'warning' : ''}" style="font-size: 10px;">${ui.escapeHtml((p.status || '').replace('_', ' ').toUpperCase())}</span>
+                <span class="m-list-card__time">${ui.escapeHtml(p.date)}</span>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `;
     }
