@@ -5,9 +5,20 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   let state = { tab: 'profile' };
 
+  const TAB_LABELS = {
+    profile:  'Profile',
+    password: 'Password',
+    payment:  'Payment Settings',
+    hostel:   'Hostel Info'
+  };
+
   function render(content, currentUser) {
+    if (isMobile()) return renderMobile(content, currentUser);
+
     content.innerHTML = `
       <div class="section-header">
         <div>
@@ -37,6 +48,30 @@
     paintPane(content, currentUser);
   }
 
+  function renderMobile(content, currentUser) {
+    content.innerHTML = `
+      <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+        <div class="m-greeting__hello">Settings</div>
+        <div class="m-greeting__date">Profile, password, payment, hostel info</div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        ${Object.entries(TAB_LABELS).map(([k, label]) => `
+          <button type="button" class="tabs__btn ${state.tab === k ? 'is-active' : ''}" data-tab="${k}">${label}</button>
+        `).join('')}
+      </div>
+
+      <div class="m-section-label">${TAB_LABELS[state.tab]}</div>
+      <div class="card card-pad" id="settings-pane"></div>
+    `;
+
+    content.querySelectorAll('[data-tab]').forEach(b => {
+      b.addEventListener('click', () => { state.tab = b.dataset.tab; render(content, currentUser); });
+    });
+
+    paintPane(content, currentUser);
+  }
+
   function paintPane(content, currentUser) {
     const pane = content.querySelector('#settings-pane');
     if (state.tab === 'profile') pane.innerHTML = profileTab(currentUser);
@@ -52,7 +87,7 @@
 
   function profileTab(u) {
     return `
-      <form class="settings-form" style="max-width: 540px;">
+      <form class="settings-form">
         <div class="grid grid-cols-2 gap-3">
           <div class="field">
             <label class="field-label" for="pr-name">Full name</label>
@@ -74,7 +109,7 @@
 
   function passwordTab() {
     return `
-      <form class="settings-form" style="max-width: 460px;">
+      <form class="settings-form">
         <div class="field">
           <label class="field-label" for="pw-current">Current password</label>
           <input class="input" id="pw-current" name="current" type="password" autocomplete="current-password">
@@ -102,7 +137,7 @@
       lateFee: '50'
     };
     return `
-      <form class="settings-form" style="max-width: 540px;">
+      <form class="settings-form">
         <h4 class="mb-3">Bank account for receiving rent</h4>
         <div class="grid grid-cols-2 gap-3">
           <div class="field">
@@ -144,7 +179,7 @@
       contactPhone: '+60-3-1234-5678'
     };
     return `
-      <form class="settings-form" style="max-width: 540px;">
+      <form class="settings-form">
         <div class="field">
           <label class="field-label" for="ho-name">Hostel name</label>
           <input class="input" id="ho-name" name="name" value="${ui.escapeHtml(cfg.name)}">

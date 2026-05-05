@@ -849,4 +849,8 @@ textarea.field__input { resize: vertical; min-height: 80px; }
     flex-shrink: 0;
     margin-top: 4px;
   }
+
+  /* ---- Settings form mobile: grid-cols-2 collapse + full-width btn ---- */
+  .settings-form .grid.grid-cols-2 { grid-template-columns: 1fr; }
+  .settings-form .btn-primary { width: 100%; padding: 12px; }
 }
