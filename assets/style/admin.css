@@ -2,6 +2,118 @@
    admin.css — Admin dashboard specific styles
    ===================================================================== */
 
+/* ---- Topbar user dropdown menu ---- */
+.topbar__user-wrap {
+  position: relative;
+}
+.topbar__user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 150ms;
+}
+.topbar__user:hover { background: var(--surface-soft); }
+.topbar__user[aria-expanded="true"] { background: var(--surface-soft); }
+.topbar__user-chevron {
+  font-size: 11px;
+  color: var(--ink-500);
+  transition: transform 200ms;
+}
+.topbar__user[aria-expanded="true"] .topbar__user-chevron {
+  transform: rotate(180deg);
+}
+
+.topbar__user-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-modal);
+  padding: 6px;
+  z-index: 60;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.topbar__user-menu.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.topbar__user-menu-header {
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--surface-soft);
+  margin-bottom: 4px;
+}
+.topbar__user-menu-name {
+  font-weight: 600;
+  color: var(--ink-900);
+  font-size: 14px;
+}
+.topbar__user-menu-email {
+  font-size: 12px;
+  color: var(--ink-500);
+  margin-top: 2px;
+}
+
+.topbar__user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--ink-700);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-input);
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  transition: background 120ms, color 120ms;
+}
+.topbar__user-menu-item:hover {
+  background: var(--surface-soft);
+  color: var(--ink-900);
+}
+.topbar__user-menu-item i {
+  width: 16px;
+  text-align: center;
+  color: var(--ink-500);
+  font-size: 13px;
+}
+.topbar__user-menu-item:hover i { color: var(--brand-primary); }
+
+.topbar__user-menu-item--danger { color: var(--danger); }
+.topbar__user-menu-item--danger i { color: var(--danger); }
+.topbar__user-menu-item--danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+}
+.topbar__user-menu-item--danger:hover i { color: var(--danger); }
+
+.topbar__user-menu-divider {
+  height: 1px;
+  background: var(--surface-soft);
+  margin: 4px 0;
+}
+
+/* Mobile: hide user name text on narrow screens, keep avatar + chevron */
+@media (max-width: 600px) {
+  .topbar__user-name { display: none; }
+  .topbar__user { padding: 4px 8px 4px 4px; }
+}
+
 .recent-list {
   list-style: none;
 }

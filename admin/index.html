@@ -119,10 +119,28 @@
         <i class="fa-solid fa-bell" aria-hidden="true"></i>
         <span class="topbar__bell-dot"></span>
       </button>
-      <div class="topbar__user" data-user-menu>
-        <div class="topbar__user-avatar" data-user-avatar>HA</div>
-        <span class="topbar__user-name" data-user-name>Hostel Admin</span>
-        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      <div class="topbar__user-wrap">
+        <button type="button" class="topbar__user" data-user-menu aria-expanded="false" aria-haspopup="menu" aria-label="Account menu">
+          <div class="topbar__user-avatar" data-user-avatar>HA</div>
+          <span class="topbar__user-name" data-user-name>Hostel Admin</span>
+          <i class="fa-solid fa-chevron-down topbar__user-chevron" aria-hidden="true"></i>
+        </button>
+        <div class="topbar__user-menu" data-user-dropdown role="menu" aria-hidden="true">
+          <div class="topbar__user-menu-header">
+            <div class="topbar__user-menu-name" data-user-name>Hostel Admin</div>
+            <div class="topbar__user-menu-email" data-user-email>admin@gmail.com</div>
+          </div>
+          <a class="topbar__user-menu-item" href="#/profile" role="menuitem">
+            <i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Profile</span>
+          </a>
+          <a class="topbar__user-menu-item" href="#/settings" role="menuitem">
+            <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span>
+          </a>
+          <div class="topbar__user-menu-divider"></div>
+          <button type="button" class="topbar__user-menu-item topbar__user-menu-item--danger" data-logout role="menuitem">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>

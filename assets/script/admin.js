@@ -65,6 +65,7 @@
     initTopbar();
     initLogout();
     initBottomNav();
+    initUserMenu();
     paintUserChrome();
     initResponsiveReRender();
 
@@ -169,6 +170,42 @@
     const initials = (currentUser.name || '').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
     document.querySelectorAll('[data-user-avatar]').forEach(el => el.textContent = initials);
     document.querySelectorAll('[data-user-name]').forEach(el => el.textContent = currentUser.name);
+    document.querySelectorAll('[data-user-email]').forEach(el => el.textContent = currentUser.email || '');
+  }
+
+  function initUserMenu() {
+    const trigger = document.querySelector('[data-user-menu]');
+    const menu = document.querySelector('[data-user-dropdown]');
+    if (!trigger || !menu) return;
+
+    function open() {
+      menu.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+      menu.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.contains('is-open') ? close() : open();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && !trigger.contains(e.target)) close();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('is-open')) close();
+    });
+
+    // Close menu after clicking any menu item (including Profile/Settings nav)
+    menu.querySelectorAll('.topbar__user-menu-item').forEach(item => {
+      item.addEventListener('click', () => close());
+    });
   }
 
   function setPageTitle(title) {
