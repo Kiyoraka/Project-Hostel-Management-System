@@ -109,7 +109,10 @@
 
   <header class="topbar">
     <div class="topbar__left">
-      <button type="button" class="topbar__toggle" data-sidebar-toggle aria-label="Toggle sidebar">
+      <button type="button" class="topbar__toggle" data-sidebar-toggle aria-label="Collapse sidebar">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="topbar__hamburger" data-mobile-menu aria-label="Open menu">
         <i class="fa-solid fa-bars" aria-hidden="true"></i>
       </button>
       <div class="topbar__title" data-page-title>Overview</div>
@@ -133,6 +136,30 @@
       <h3>Loading...</h3>
     </div>
   </main>
+
+  <div class="sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
+
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <div class="bottom-nav__sub" id="bottom-nav-sub" role="tablist"></div>
+    <div class="bottom-nav__groups">
+      <button type="button" class="bottom-nav__group-item" data-group="main" aria-label="Main">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+        <span>Main</span>
+      </button>
+      <button type="button" class="bottom-nav__group-item" data-group="operations" aria-label="Operations">
+        <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+        <span>Operations</span>
+      </button>
+      <button type="button" class="bottom-nav__group-item" data-group="people" aria-label="People">
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        <span>People</span>
+      </button>
+      <button type="button" class="bottom-nav__group-item" data-group="account" aria-label="Account">
+        <i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+        <span>Account</span>
+      </button>
+    </div>
+  </nav>
 
 </body>
 </html>
