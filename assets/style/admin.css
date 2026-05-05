@@ -777,4 +777,76 @@ textarea.field__input { resize: vertical; min-height: 80px; }
     width: 24px;
     border-radius: 4px;
   }
+
+  /* ---- Block selector pills (Hostel Management Room & Beds tab) ---- */
+  .m-block-pills {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 0 var(--space-3);
+  }
+  .m-block-pills::-webkit-scrollbar { display: none; }
+  .m-block-pill {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    border: 1px solid var(--ink-300);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-700);
+    cursor: pointer;
+    transition: background 150ms, color 150ms, border-color 150ms;
+  }
+  .m-block-pill:hover { background: var(--surface-soft); }
+  .m-block-pill.is-active {
+    background: var(--brand-primary);
+    color: var(--surface);
+    border-color: var(--brand-primary);
+    font-weight: 600;
+  }
+
+  /* ---- Segmented control (Check In/Out Action picker) ---- */
+  .m-segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: var(--surface-soft);
+    border-radius: var(--radius-input);
+    padding: 4px;
+    margin-top: 4px;
+  }
+  .m-segmented__btn {
+    padding: 10px 12px;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-500);
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+  }
+  .m-segmented__btn.is-active {
+    background: var(--surface);
+    color: var(--brand-primary);
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ---- Room row with status dot prefix (Room & Beds list) ---- */
+  .m-room-row {
+    cursor: pointer;
+    align-items: center;
+  }
+  .m-room-row:hover { background: var(--surface-soft); }
+  .m-room-row .m-list-card__time { font-weight: 600; color: var(--ink-700); }
+  .m-room-row__dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
 }
