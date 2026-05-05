@@ -17,12 +17,16 @@
     paintUserChrome();
 
     ui.hashRouter({
-      '/':            initOverview,
-      '/users':       initUsers,
-      '/rooms':       initRooms,
-      '/rentals':     initRentals,
-      '/maintenance': initMaintenance,
-      '/settings':    initSettings
+      '/':               initOverview,
+      '/hostel':         initHostel,
+      '/residents':      initResidents,
+      '/maintenance':    initMaintenance,
+      '/transportation': initTransportation,
+      '/billing':        initBilling,
+      '/staff':          initStaff,
+      '/helpdesk':       initHelpdesk,
+      '/profile':        initProfile,
+      '/settings':       initSettings
     }, '/');
   });
 
@@ -239,21 +243,85 @@
   }
 
   /* ===================================================================
-     Section: Maintenance  (populated in Phase 8)
+     Section: Maintenance  (tabbed wrapper, falls back to flat)
      =================================================================== */
   function initMaintenance() {
     setPageTitle('Maintenance');
+    if (typeof window.adminMaintenanceTabbedInit === 'function') return window.adminMaintenanceTabbedInit({ content: content(), currentUser });
     if (typeof window.adminMaintenanceInit === 'function') return window.adminMaintenanceInit({ content: content() });
     content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-screwdriver-wrench"></i><h3>Maintenance section</h3><p>Loading...</p></div>';
   }
 
   /* ===================================================================
-     Section: Settings  (populated in Phase 9)
+     Section: Settings
      =================================================================== */
   function initSettings() {
     setPageTitle('Settings');
     if (typeof window.adminSettingsInit === 'function') return window.adminSettingsInit({ content: content(), currentUser });
     content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-gear"></i><h3>Settings section</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Hostel Management  (tabbed - Phase 6)
+     =================================================================== */
+  function initHostel() {
+    setPageTitle('Hostel Management');
+    if (typeof window.adminHostelInit === 'function') return window.adminHostelInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-building"></i><h3>Hostel Management</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Resident Management  (tabbed - Phase 7)
+     =================================================================== */
+  function initResidents() {
+    setPageTitle('Resident Management');
+    if (typeof window.adminResidentsInit === 'function') return window.adminResidentsInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-users"></i><h3>Resident Management</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Transportation  (tabbed - Phase 8)
+     =================================================================== */
+  function initTransportation() {
+    setPageTitle('Transportation');
+    if (typeof window.adminTransportationInit === 'function') return window.adminTransportationInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-van-shuttle"></i><h3>Transportation</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Billings & Payment  (tabbed - Phase 9)
+     =================================================================== */
+  function initBilling() {
+    setPageTitle('Billings & Payment');
+    if (typeof window.adminBillingInit === 'function') return window.adminBillingInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-money-bill-wave"></i><h3>Billings & Payment</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Staff & Users  (tabbed - Phase 11)
+     =================================================================== */
+  function initStaff() {
+    setPageTitle('Staff & Users');
+    if (typeof window.adminStaffInit === 'function') return window.adminStaffInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-user-tie"></i><h3>Staff & Users</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Helpdesk  (Phase 12)
+     =================================================================== */
+  function initHelpdesk() {
+    setPageTitle('Helpdesk');
+    if (typeof window.adminHelpdeskInit === 'function') return window.adminHelpdeskInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-life-ring"></i><h3>Helpdesk</h3><p>Loading...</p></div>';
+  }
+
+  /* ===================================================================
+     Section: Profile  (Phase 13)
+     =================================================================== */
+  function initProfile() {
+    setPageTitle('Profile');
+    if (typeof window.adminProfileInit === 'function') return window.adminProfileInit({ content: content(), currentUser });
+    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-id-card"></i><h3>Profile</h3><p>Loading...</p></div>';
   }
 
   // Expose helpers for section modules added in later phases
