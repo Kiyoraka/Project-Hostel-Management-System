@@ -6,6 +6,8 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   const TABS = [
     { id: 'overview',   label: 'Overview',    icon: 'fa-gauge' },
     { id: 'invoices',   label: 'Invoices',    icon: 'fa-file-invoice-dollar' },
@@ -52,7 +54,14 @@
       if (activeTab === 'statistics') return renderStatistics(panel);
     }
 
+    function paymentStatusBadge(s) {
+      if (s === 'paid') return 'success';
+      if (s === 'due') return 'warning';
+      return 'danger';
+    }
+
     function renderOverview(panel) {
+      if (isMobile()) return renderMobileOverview(panel);
       const payments = store.readAll('payments') || [];
       const totalBilled = payments.reduce((s, p) => s + (p.amount || 0), 0);
       const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
@@ -82,7 +91,66 @@
       `;
     }
 
+    function renderMobileOverview(panel) {
+      const payments = store.readAll('payments') || [];
+      const totalBilled = payments.reduce((s, p) => s + (p.amount || 0), 0);
+      const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
+      const outstanding = totalBilled - totalPaid;
+      const overdueCount = payments.filter(p => p.status === 'late' || p.status === 'overdue').length;
+      const collectionRate = totalBilled ? Math.round(totalPaid / totalBilled * 100) : 0;
+      const recent = payments.filter(p => p.status === 'paid').slice(0, 5);
+
+      panel.innerHTML = `
+        <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+          <div class="m-greeting__hello">Billings &amp; Payment</div>
+          <div class="m-greeting__date">${payments.length} invoices tracked</div>
+        </div>
+
+        <div class="m-hero-card">
+          <div class="m-hero-card__label">Total Billed</div>
+          <div class="m-hero-card__value">${ui.formatMoney(totalBilled)}</div>
+          <div class="m-hero-card__bar">
+            <div class="m-hero-card__bar-fill" style="width: ${collectionRate}%;"></div>
+          </div>
+          <div class="m-hero-card__summary">
+            <span><i class="dot dot--paid"></i> ${ui.formatMoney(totalPaid)} paid</span>
+            <span><i class="dot dot--due"></i> ${ui.formatMoney(outstanding)} due</span>
+            <span><i class="dot dot--overdue"></i> ${overdueCount} overdue</span>
+          </div>
+        </div>
+
+        <div class="m-stats-row">
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Collection Rate</div>
+            <div class="m-stat-card__value">${collectionRate}%</div>
+            <div class="m-stat-card__delta">paid / billed</div>
+          </div>
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Outstanding</div>
+            <div class="m-stat-card__value" style="font-size: 16px;">${ui.formatMoney(outstanding)}</div>
+            <div class="m-stat-card__delta m-stat-card__delta--down">${overdueCount} overdue</div>
+          </div>
+        </div>
+
+        <div class="m-section-label">Recent Payments <span class="m-carousel-hint">${recent.length}</span></div>
+        <div class="m-list-card">
+          ${recent.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-money-bill-wave activity-feed__icon activity-feed__icon--payment" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.tenantName)} &middot; ${ui.formatMoney(p.amount)}</span>
+                <span class="m-list-card__meta">${ui.formatPeriod(p.period)} &middot; ${ui.escapeHtml(p.method || '-')}</span>
+              </div>
+              <span class="m-list-card__time">${ui.escapeHtml(p.paidOn || '-')}</span>
+            </div>
+          `).join('')}
+          ${recent.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500);">No payments yet</div>' : ''}
+        </div>
+      `;
+    }
+
     function renderInvoices(panel) {
+      if (isMobile()) return renderMobileInvoices(panel);
       panel.innerHTML = '<div class="card card-pad" id="billing-invoices-mount"></div>';
       const mount = panel.querySelector('#billing-invoices-mount');
       if (typeof window.adminRentalsInit === 'function') {
@@ -92,7 +160,30 @@
       }
     }
 
+    function renderMobileInvoices(panel) {
+      const payments = store.readAll('payments') || [];
+      panel.innerHTML = `
+        <div class="m-section-label">Invoices <span class="m-carousel-hint">${payments.length}</span></div>
+        <div class="m-list-card">
+          ${payments.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-file-invoice-dollar activity-feed__icon activity-feed__icon--payment" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.tenantName)} &middot; ${ui.escapeHtml(p.roomId)}</span>
+                <span class="m-list-card__meta">${ui.formatPeriod(p.period)} &middot; ${ui.formatMoney(p.amount)}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span class="badge badge--${paymentStatusBadge(p.status)}" style="font-size: 10px;">${ui.escapeHtml((p.status || '').toUpperCase())}</span>
+                <span class="m-list-card__time">${ui.escapeHtml(p.paidOn || '-')}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function renderOverdue(panel) {
+      if (isMobile()) return renderMobileOverdue(panel);
       const payments = (store.readAll('payments') || []).filter(p => p.status === 'late' || p.status === 'overdue' || p.status === 'due');
       panel.innerHTML = `
         <div class="card card-pad">
@@ -118,7 +209,30 @@
       `;
     }
 
+    function renderMobileOverdue(panel) {
+      const payments = (store.readAll('payments') || []).filter(p => p.status === 'late' || p.status === 'overdue' || p.status === 'due');
+
+      panel.innerHTML = `
+        <div class="m-section-label">Overdue &amp; Due Accounts <span class="m-carousel-hint">${payments.length}</span></div>
+        <div class="m-list-card">
+          ${payments.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-circle-exclamation activity-feed__icon activity-feed__icon--maintenance" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.tenantName)} &middot; ${ui.escapeHtml(p.roomId)}</span>
+                <span class="m-list-card__meta">${ui.formatPeriod(p.period)} &middot; ${ui.formatMoney(p.amount)}</span>
+                <button class="btn btn-ghost btn-sm" type="button" style="margin-top: 6px; align-self: flex-start;">Send Reminder</button>
+              </div>
+              <span class="badge badge--${p.status === 'late' || p.status === 'overdue' ? 'danger' : 'warning'}" style="font-size: 10px; flex-shrink: 0;">${ui.escapeHtml((p.status || '').toUpperCase())}</span>
+            </div>
+          `).join('')}
+          ${payments.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500);">All accounts current</div>' : ''}
+        </div>
+      `;
+    }
+
     function renderCompounds(panel) {
+      if (isMobile()) return renderMobileCompounds(panel);
       const compounds = store.readAll('compounds') || [];
       panel.innerHTML = `
         <div class="card card-pad stub-section">
@@ -162,7 +276,43 @@
       `;
     }
 
+    function renderMobileCompounds(panel) {
+      const compounds = store.readAll('compounds') || [];
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; auto-detection ships in Phase 2.</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="button" style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Issue Compound
+        </button>
+
+        <div class="m-section-label">Compound Fines <span class="m-carousel-hint">${compounds.length}</span></div>
+        <div class="m-list-card">
+          ${compounds.map(c => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-receipt activity-feed__icon activity-feed__icon--maintenance" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(c.studentName)} &middot; ${ui.formatMoney(c.amount)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(c.violation)}</span>
+                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(c.studentId)}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span class="badge badge--${c.status === 'paid' ? 'success' : 'warning'}" style="font-size: 10px;">${ui.escapeHtml((c.status || '').toUpperCase())}</span>
+                <span class="m-list-card__time">${ui.formatRelative(c.issuedAt)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function renderStatistics(panel) {
+      if (isMobile()) return renderMobileStatistics(panel);
       panel.innerHTML = `
         <div class="card card-pad stub-section">
           <div class="stub-section__banner">
@@ -206,6 +356,58 @@
             scales: {
               x: { grid: { display: false } },
               y: { beginAtZero: true, ticks: { callback: v => 'RM ' + (v/1000) + 'k' } }
+            }
+          }
+        });
+      }
+    }
+
+    function renderMobileStatistics(panel) {
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; drilldown reports ship in Phase 2.</span>
+          </div>
+        </div>
+
+        <div class="m-section-label">Monthly Revenue <span class="m-carousel-hint">last 6 months</span></div>
+        <div class="card card-pad">
+          <div style="position: relative; height: 220px;">
+            <canvas id="billing-stats-chart-mobile"></canvas>
+          </div>
+        </div>
+
+        <div class="m-section-label">Coming Next</div>
+        <div class="m-list-card">
+          ${['Drilldown by tenant', 'Block-level revenue', 'Year-on-year compare', 'CSV / PDF export'].map(item => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-circle-dot" style="color: var(--brand-primary); font-size: 8px; margin-top: 8px;" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title" style="font-weight: 400;">${ui.escapeHtml(item)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      const canvas = panel.querySelector('#billing-stats-chart-mobile');
+      if (canvas && window.Chart) {
+        new Chart(canvas, {
+          type: 'bar',
+          data: {
+            labels: ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'],
+            datasets: [
+              { label: 'Billed',    data: [62000, 64500, 65000, 65800, 65400, 66200], backgroundColor: '#BAE6FD' },
+              { label: 'Collected', data: [58000, 61000, 62500, 63000, 58200, 59800], backgroundColor: '#0EA5E9' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+            scales: {
+              x: { grid: { display: false } },
+              y: { beginAtZero: true, ticks: { callback: v => 'RM ' + (v/1000) + 'k', font: { size: 10 } } }
             }
           }
         });
