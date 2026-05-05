@@ -6,6 +6,8 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   const TABS = [
     { id: 'staff',    label: 'Staff List',          icon: 'fa-user-tie' },
     { id: 'roles',    label: 'Roles & Permission',  icon: 'fa-shield-halved' },
@@ -51,6 +53,7 @@
     }
 
     function renderStaff(panel) {
+      if (isMobile()) return renderMobileStaff(panel);
       const staff = auth.listUsers().filter(u => u.role === 'admin' || u.role === 'driver');
       panel.innerHTML = `
         <div class="card card-pad">
@@ -77,7 +80,53 @@
       `;
     }
 
+    function renderMobileStaff(panel) {
+      const staff = auth.listUsers().filter(u => u.role === 'admin' || u.role === 'driver');
+      const admins = staff.filter(s => s.role === 'admin').length;
+      const drivers = staff.filter(s => s.role === 'driver').length;
+
+      panel.innerHTML = `
+        <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+          <div class="m-greeting__hello">Internal Staff</div>
+          <div class="m-greeting__date">${staff.length} active members</div>
+        </div>
+
+        <div class="m-stats-row">
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Admins</div>
+            <div class="m-stat-card__value">${admins}</div>
+            <div class="m-stat-card__delta">manage system</div>
+          </div>
+          <div class="m-stat-card">
+            <div class="m-stat-card__label">Drivers</div>
+            <div class="m-stat-card__value">${drivers}</div>
+            <div class="m-stat-card__delta">on duty</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="button" style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Add Staff
+        </button>
+
+        <div class="m-section-label">All Staff <span class="m-carousel-hint">${staff.length}</span></div>
+        <div class="m-list-card">
+          ${staff.map(s => `
+            <div class="m-list-card__row" style="align-items: center;">
+              <span style="width: 40px; height: 40px; border-radius: 50%; background: var(--brand-tint); color: var(--brand-primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0;">${ui.escapeHtml((s.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase())}</span>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(s.name)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(s.email)}</span>
+                <span class="m-list-card__meta" style="font-size: 11px;">ID: ${ui.escapeHtml(s.id)}</span>
+              </div>
+              <span class="badge badge--${s.role === 'admin' ? 'success' : 'info'}" style="font-size: 10px;">${ui.escapeHtml((s.role || '').toUpperCase())}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function renderRoles(panel) {
+      if (isMobile()) return renderMobileRoles(panel);
       const capabilities = ['Manage Users', 'View Payments', 'Edit Rooms', 'Scan QR', 'Issue Compounds', 'Send Announcements', 'View Reports', 'Export Data'];
       const matrix = {
         'Admin':   [true, true, true, false, true, true, true, true],
@@ -124,7 +173,46 @@
       `;
     }
 
+    function renderMobileRoles(panel) {
+      const capabilities = ['Manage Users', 'View Payments', 'Edit Rooms', 'Scan QR', 'Issue Compounds', 'Send Announcements', 'View Reports', 'Export Data'];
+      const matrix = {
+        'Admin':   [true, true, true, false, true, true, true, true],
+        'Staff':   [false, true, true, false, true, true, true, false],
+        'Driver':  [false, false, false, true, false, false, false, false],
+        'Tenant':  [false, false, false, false, false, false, false, false]
+      };
+      const roleColor = { 'Admin': 'success', 'Staff': 'info', 'Driver': 'warning', 'Tenant': '' };
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; editable matrix ships in Phase 2.</span>
+          </div>
+        </div>
+
+        <div class="m-section-label">Permission Matrix <span class="m-carousel-hint">${capabilities.length} capabilities</span></div>
+        <div class="m-list-card">
+          ${capabilities.map((cap, ci) => {
+            const grantedRoles = Object.keys(matrix).filter(r => matrix[r][ci]);
+            return `
+              <div class="m-list-card__row">
+                <i class="fa-solid fa-shield-halved activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+                <div class="m-list-card__main">
+                  <span class="m-list-card__title">${ui.escapeHtml(cap)}</span>
+                  <span class="m-list-card__meta" style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    ${grantedRoles.length === 0 ? '<span class="badge" style="font-size: 9px;">NONE</span>' : grantedRoles.map(r => `<span class="badge badge--${roleColor[r]}" style="font-size: 9px;">${r.toUpperCase()}</span>`).join('')}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     function renderLogs(panel) {
+      if (isMobile()) return renderMobileLogs(panel);
       const logs = [
         { user: 'Hostel Admin',  action: 'Updated room R-204 status to occupied', ip: '10.0.0.42',  at: '5 minutes ago' },
         { user: 'Hostel Admin',  action: 'Sent announcement: Water tank maint',   ip: '10.0.0.42',  at: '6 hours ago' },
@@ -172,7 +260,45 @@
       `;
     }
 
+    function renderMobileLogs(panel) {
+      const logs = [
+        { user: 'Hostel Admin',  action: 'Updated room R-204 status to occupied', ip: '10.0.0.42',  at: '5 minutes ago' },
+        { user: 'Hostel Admin',  action: 'Sent announcement: Water tank maint',   ip: '10.0.0.42',  at: '6 hours ago' },
+        { user: 'Pak Lim',       action: 'Logged in to driver app',               ip: '10.0.0.55',  at: '8 hours ago' },
+        { user: 'Hostel Admin',  action: 'Issued compound CP-001 to Lee Wei',     ip: '10.0.0.42',  at: '2 days ago' },
+        { user: 'Ahmad Faiz',    action: 'Submitted maintenance M01 (Leaky tap)', ip: '10.0.1.12',  at: '2 days ago' },
+        { user: 'Hostel Admin',  action: 'Resolved maintenance M07 (Light bulb)', ip: '10.0.0.42',  at: '5 days ago' },
+        { user: 'Siti Aminah',   action: 'Submitted helpdesk ticket HD-002',      ip: '10.0.1.18',  at: '8 hours ago' },
+        { user: 'Hostel Admin',  action: 'Logged in',                              ip: '10.0.0.42',  at: '8 hours ago' }
+      ];
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; filter + export ship in Phase 2.</span>
+          </div>
+        </div>
+
+        <div class="m-section-label">Recent Activity <span class="m-carousel-hint">${logs.length}</span></div>
+        <div class="m-list-card">
+          ${logs.map(l => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-list-check activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(l.user)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(l.action)}</span>
+                <span class="m-list-card__meta" style="font-family: var(--font-mono); font-size: 11px; opacity: 0.7;">${ui.escapeHtml(l.ip)}</span>
+              </div>
+              <span class="m-list-card__time">${ui.escapeHtml(l.at)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     function renderPartners(panel) {
+      if (isMobile()) return renderMobilePartners(panel);
       const partners = store.readAll('partners') || [];
       panel.innerHTML = `
         <div class="card card-pad stub-section">
@@ -215,6 +341,37 @@
               </ul>
             </aside>
           </div>
+        </div>
+      `;
+    }
+
+    function renderMobilePartners(panel) {
+      const partners = store.readAll('partners') || [];
+
+      panel.innerHTML = `
+        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
+          <div class="stub-section__banner" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>Prototype scope &mdash; MOU upload ships in Phase 2.</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="button" style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Add Partner
+        </button>
+
+        <div class="m-section-label">University Partners <span class="m-carousel-hint">${partners.length}</span></div>
+        <div class="m-list-card">
+          ${partners.map(p => `
+            <div class="m-list-card__row" style="align-items: center;">
+              <span style="width: 48px; height: 48px; border-radius: var(--radius-input); background: var(--brand-tint); color: var(--brand-primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;">${ui.escapeHtml(p.shortName)}</span>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(p.name)}</span>
+                <span class="m-list-card__meta">${p.studentCount} students &middot; MOU ${ui.escapeHtml(p.mouSigned)}</span>
+                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(p.contactPerson)} &middot; ${ui.escapeHtml(p.contactEmail)}</span>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `;
     }
