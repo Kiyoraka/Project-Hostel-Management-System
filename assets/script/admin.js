@@ -7,6 +7,56 @@
 
   let currentUser = null;
 
+  /* ===================================================================
+     Mobile Native Adaptation -- 2-tier bottom nav (Phase M3)
+     =================================================================== */
+
+  const ROUTES_TO_GROUP = {
+    '/':               'main',
+    '/hostel':         'operations',
+    '/residents':      'operations',
+    '/maintenance':    'operations',
+    '/transportation': 'operations',
+    '/billing':        'operations',
+    '/staff':          'people',
+    '/helpdesk':       'people',
+    '/profile':        'account',
+    '/settings':       'account'
+  };
+
+  const GROUPS = {
+    main: {
+      defaultRoute: '/',
+      items: [
+        { route: '/', label: 'Dashboard', icon: 'fa-gauge-high' }
+      ]
+    },
+    operations: {
+      defaultRoute: '/hostel',
+      items: [
+        { route: '/hostel',         label: 'Hostel',     icon: 'fa-building' },
+        { route: '/residents',      label: 'Residents',  icon: 'fa-users' },
+        { route: '/maintenance',    label: 'Maint',      icon: 'fa-screwdriver-wrench' },
+        { route: '/transportation', label: 'Transport',  icon: 'fa-van-shuttle' },
+        { route: '/billing',        label: 'Billing',    icon: 'fa-money-bill-wave' }
+      ]
+    },
+    people: {
+      defaultRoute: '/staff',
+      items: [
+        { route: '/staff',    label: 'Staff & Users', icon: 'fa-user-tie' },
+        { route: '/helpdesk', label: 'Helpdesk',      icon: 'fa-life-ring' }
+      ]
+    },
+    account: {
+      defaultRoute: '/profile',
+      items: [
+        { route: '/profile',  label: 'Profile',  icon: 'fa-id-card' },
+        { route: '/settings', label: 'Settings', icon: 'fa-gear' }
+      ]
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', function () {
     currentUser = auth.requireRole(['admin']);
     if (!currentUser) return;
@@ -14,6 +64,8 @@
     initSidebar();
     initTopbar();
     initLogout();
+    initBottomNav();
+    initMobileSidebar();
     paintUserChrome();
 
     ui.hashRouter({
@@ -34,15 +86,100 @@
     const items = document.querySelectorAll('[data-route]');
     function syncActive() {
       const hash = window.location.hash.replace(/^#/, '') || '/';
+      const groupId = ROUTES_TO_GROUP[hash] || 'main';
       items.forEach(it => {
         const isActive = it.dataset.route === hash;
         it.classList.toggle('is-active', isActive);
         if (isActive) it.setAttribute('aria-current', 'page');
         else it.removeAttribute('aria-current');
       });
+      // Sync bottom nav group tabs
+      document.querySelectorAll('[data-group]').forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.group === groupId);
+      });
+      // Re-render sub-row to reflect current group + active item
+      renderSubRow(groupId);
     }
     window.addEventListener('hashchange', syncActive);
     syncActive();
+  }
+
+  function initBottomNav() {
+    document.querySelectorAll('[data-group]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const groupId = btn.dataset.group;
+        const currentHash = window.location.hash.replace(/^#/, '') || '/';
+        const currentGroup = ROUTES_TO_GROUP[currentHash] || 'main';
+
+        if (groupId === currentGroup) {
+          // Q2: tapping active group tab -> scroll to top of content
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        // Q1: tapping different group -> navigate to that group's default route
+        const target = GROUPS[groupId] && GROUPS[groupId].defaultRoute;
+        if (target) window.location.hash = '#' + target;
+      });
+    });
+  }
+
+  function renderSubRow(groupId) {
+    const sub = document.getElementById('bottom-nav-sub');
+    if (!sub) return;
+    const group = GROUPS[groupId];
+    if (!group) { sub.innerHTML = ''; return; }
+    const currentHash = window.location.hash.replace(/^#/, '') || '/';
+
+    sub.innerHTML = group.items.map(item => `
+      <a class="bottom-nav__sub__item ${item.route === currentHash ? 'is-active' : ''}"
+         href="#${item.route}"
+         data-sub-route="${item.route}"
+         role="tab"
+         aria-selected="${item.route === currentHash}">
+        <i class="fa-solid ${item.icon}" aria-hidden="true"></i><span>${item.label}</span>
+      </a>
+    `).join('');
+
+    // Auto-scroll active sub-item into view
+    const active = sub.querySelector('.is-active');
+    if (active && active.scrollIntoView) {
+      try {
+        active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+      } catch (e) { /* older browsers without options support */ }
+    }
+  }
+
+  function initMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.querySelector('[data-sidebar-backdrop]');
+    const hamburger = document.querySelector('[data-mobile-menu]');
+    if (!sidebar || !backdrop || !hamburger) return;
+
+    function open() {
+      sidebar.classList.add('is-open');
+      backdrop.classList.add('is-visible');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+      sidebar.classList.remove('is-open');
+      backdrop.classList.remove('is-visible');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.contains('is-open') ? close() : open();
+    });
+    backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) close();
+    });
+    // Close drawer when a sidebar nav link is tapped (mobile UX)
+    sidebar.querySelectorAll('.sidebar__nav-item').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 900) close();
+      });
+    });
   }
 
   function initTopbar() {
