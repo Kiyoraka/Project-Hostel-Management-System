@@ -143,6 +143,36 @@
    payment legend, activity feed, stub section, dots (Phase 4)
    ===================================================================== */
 
+/* ---- BEM-style aliases (so PDMS module files can use either convention) ---- */
+.badge--success { background: var(--success-tint); color: var(--success); }
+.badge--warning { background: var(--warning-tint); color: var(--warning); }
+.badge--danger  { background: var(--danger-tint);  color: var(--danger); }
+.badge--info    { background: var(--info-tint);    color: var(--info); }
+.field__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-700);
+  margin-bottom: 6px;
+}
+.field__input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-input);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--ink-900);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.field__input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  outline: none;
+}
+textarea.field__input { resize: vertical; min-height: 80px; }
+
 /* ---- Tabs (used by 6 tabbed modules) ---- */
 .tabs {
   display: flex;

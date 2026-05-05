@@ -38,8 +38,11 @@ A modern student hostel management web application built as **pure vanilla HTML 
 │   │   ├── seed.js             First-load seed data
 │   │   ├── ui.js               Toast + modal + drawer + formatters + hash router
 │   │   ├── landing.js          Landing + login modal
-│   │   ├── admin.js            Admin router + chrome
-│   │   ├── admin-{users,rooms,rentals,maintenance,settings}.js
+│   │   ├── admin.js            Admin router + Dashboard
+│   │   ├── admin-{users,rooms,rentals,maintenance,settings}.js   Original 5 sections (still active)
+│   │   ├── admin-{hostel,residents,transportation,billing,staff}.js   Tabbed PDMS wrappers
+│   │   ├── admin-maintenance-tabbed.js  Maintenance 4-tab wrapper
+│   │   ├── admin-{helpdesk,profile}.js  Single-view PDMS modules
 │   │   ├── tenant.js           Tenant router + chrome
 │   │   ├── tenant-{home,room,schedule,maintenance,payments,settings}.js
 │   │   ├── driver.js           Driver router + chrome
@@ -56,13 +59,10 @@ No install, no build step. Either:
 **Option A — Open directly:**
 Double-click `index.html` to open in the default browser. Note: Driver QR scanner requires camera access, which most browsers only grant from `localhost` or HTTPS, not `file://`. Use Option B for the full driver demo.
 
-**Option B — Local server:**
-```bash
-python -m http.server 8080
-# Then open http://localhost:8080
-```
+**Option B — VS Code Live Server (recommended for camera demo):**
+Right-click `index.html` in VS Code and select **"Open with Live Server"** (Ritwick Dey extension). The page opens at `http://127.0.0.1:5500` with auto-reload, and the driver QR camera works because the origin is `localhost`-class instead of `file://`.
 
-Or any other static file server (`npx serve`, `php -S localhost:8080`, etc.).
+No `npm install`, no build step, no Python required — just a static file server of your choice.
 
 ## Demo Credentials
 
@@ -76,13 +76,22 @@ The login modal has clickable demo-login buttons that auto-fill these credential
 
 ## Roles & Surfaces
 
-### Admin (desktop, left sidebar)
-- **Overview** — KPI tiles (tenants, occupancy, open maintenance, today's pickups), recent activity, 30-day occupancy trend chart
-- **Users** — searchable + filtered + paginated user table with role-aware add/edit modal (tenant fields vs driver fields)
-- **Rooms** — block-tabbed grid (A/B/C) with status dots, click for detail drawer with tenant info + amenities, mark maintenance toggle
-- **Rentals** — payments table with status filter pills (Paid/Due/Late) + month dropdown, summary footer (Total billed/Paid/Outstanding)
-- **Maintenance** — reports table sorted by recency, status filter pills, click row for detail drawer (description + photos + assign + status + notes), CSV export
-- **Settings** — Profile / Password / Payment Settings / Hostel Info tabs
+### Admin (desktop, left sidebar — PDMS taxonomy)
+
+The admin dashboard is structured around the client's PDMS Hostel Management module spec. 10 sidebar items grouped into 3 visual sections (Operations / People / Account):
+
+- **Dashboard** — 10 widgets across 3 rows: 6-tile KPI strip (Total Beds, Occupied, Available, Occupancy Rate, Outstanding Payments, Pending Maintenance), Room Status mini-grid + Payment Status donut, Occupancy Summary trend chart + Recent Activity feed
+- **Hostel Management** *(tabbed)* — Overview (Hostel List) / Room & Beds (existing rich grid) / Check In/Out (form + recent table) / Appointments (timeline)
+- **Resident Management** *(tabbed)* — Overview (existing user table) / Record (resident card grid) / Announcement (list + compose) / Attendance/GeoFencing (map + log) / History (timeline)
+- **Maintenance** *(tabbed)* — Overview (existing reports + drawer) / Complaints (facility complaints) / Work Order (vendor tasks) / Records (resolved archive)
+- **Transportation** *(tabbed)* — Overview (KPI strip) / Trip Schedule (table) / Trip Status (live reports)
+- **Billings & Payment** *(tabbed)* — Overview (KPI strip) / Invoices (existing rentals) / Overdue (filtered view) / Compounds (fines) / Statistics (revenue chart)
+- **Staff & Users** *(tabbed)* — Staff List (admins + drivers) / Roles & Permission (matrix) / Activity Logs (audit feed) / University Partners (MOU cards)
+- **Helpdesk** — single-view ticket queue with KPI strip + table + drawer detail
+- **Profile** — single-view account card with Activity + Preferences cards
+- **Settings** — Profile / Password / Payment Settings / Hostel Info tabs (existing)
+
+Tabs swap content in-memory without changing the hash route, so browser-back returns to the previous main section, not the previous tab.
 
 ### Student / Tenant (desktop, left sidebar)
 - **Home** — welcome card + 4 action cards (My Room / Next Class Pickup / Rent Status / Open Maintenance)
@@ -134,6 +143,51 @@ The system's defining feature. **Direction: driver shows / student scans** — l
 8. **Driver sees boarded students appear live** in the QR view as students confirm
 
 Each driver QR is a single, time-bound, signed token shared by all students of that pickup window.
+
+## Module Coverage (PDMS)
+
+This is a hardcoded prototype demonstrating the PDMS Hostel Management module structure. Each PDMS sub-item is mapped against one of three states:
+
+- **Live** — existing rich screen reused, fully interactive with seed data persisted to `localStorage`
+- **Demo** — stub backed by seed data, structure visible with sample content
+- **Planned** — listed in IA + visible in UI but content ships in the next phase (signaled by the soft "Prototype scope" banner + Coming next sidebar)
+
+| PDMS Group | Sub-item | Status |
+|---|---|---|
+| Dashboard | Total Beds / Occupied / Available / Occupancy Rate | Live |
+| Dashboard | Outstanding Payments / Pending Maintenance | Live |
+| Dashboard | Room Status grid / Payment Status donut | Live |
+| Dashboard | Occupancy Summary / Recent Activity | Live |
+| Hostel Management | Overview (Hostel List) | Demo |
+| Hostel Management | Room & Beds | Live |
+| Hostel Management | Check In/Out | Demo |
+| Hostel Management | Appointments | Demo |
+| Resident Management | Overview (all residents) | Live |
+| Resident Management | Record | Demo |
+| Resident Management | Announcement | Demo |
+| Resident Management | Attendance / GeoFencing | Demo + Planned (live map) |
+| Resident Management | History | Demo |
+| Maintenance | Overview | Live |
+| Maintenance | Complaints | Demo |
+| Maintenance | Work Order | Demo |
+| Maintenance | Records | Demo |
+| Transportation | Overview | Demo |
+| Transportation | Trip Schedule | Demo |
+| Transportation | Trip Status | Demo |
+| Billings & Payment | Overview | Live |
+| Billings & Payment | Invoices | Live |
+| Billings & Payment | Overdue | Live |
+| Billings & Payment | Compounds | Demo |
+| Billings & Payment | Statistics | Demo |
+| Staff & Users | Staff List | Live |
+| Staff & Users | Roles & Permission | Demo |
+| Staff & Users | Activity Logs | Demo |
+| Staff & Users | University Partners | Demo |
+| Helpdesk | Ticket queue | Demo |
+| Profile | Account info / Activity / Preferences | Live (uses current session) |
+| Settings | Profile / Password / Payment Settings / Hostel Info | Live |
+
+Demo seed data uses Malaysian-context names and addresses (Asrama Mahkota, +60 phone format, UTM/USM/UM partners, Block A/B/C wardens) so the prototype reads as regional rather than generic.
 
 ## Browser Support
 
