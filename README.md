@@ -64,6 +64,8 @@ Right-click `index.html` in VS Code and select **"Open with Live Server"** (Ritw
 
 No `npm install`, no build step, no Python required — just a static file server of your choice.
 
+> **Mobile demo tip:** to test admin's native mobile mode without a phone, open Chrome DevTools (F12) → toggle device toolbar (Ctrl+Shift+M) → pick iPhone 14 / Pixel 7 / iPad → reload. The admin dashboard switches to bottom-nav layout below 900px wide.
+
 ## Demo Credentials
 
 | Role | Email | Password |
@@ -76,7 +78,9 @@ The login modal has clickable demo-login buttons that auto-fill these credential
 
 ## Roles & Surfaces
 
-### Admin (desktop, left sidebar — PDMS taxonomy)
+### Admin (responsive — desktop sidebar OR mobile native bottom nav)
+
+The admin dashboard adapts to the viewport. Above 900px wide it shows the desktop left-sidebar layout; below 900px it switches to a native mobile pattern with a 2-tier bottom navigation + slide-in sidebar drawer.
 
 The admin dashboard is structured around the client's PDMS Hostel Management module spec. 10 sidebar items grouped into 3 visual sections (Operations / People / Account):
 
@@ -92,6 +96,18 @@ The admin dashboard is structured around the client's PDMS Hostel Management mod
 - **Settings** — Profile / Password / Payment Settings / Hostel Info tabs (existing)
 
 Tabs swap content in-memory without changing the hash route, so browser-back returns to the previous main section, not the previous tab.
+
+#### Mobile Native Mode (admin viewport <900px)
+
+When the admin dashboard opens at narrow widths (phone, tablet portrait, or DevTools mobile emulation), it auto-switches to a native mobile layout:
+
+- **2-tier bottom navigation** — bottom row has 4 group tabs (Main / Operations / People / Account); a sub-row above it shows the routes inside the active group. Tap a group tab to swap the sub-row; tap a sub-row item to navigate. Tap the active group tab a second time to scroll content to top (iOS pattern).
+- **Sub-row scrolls horizontally** — long groups (Operations has 5 items) swipe naturally with scroll-snap, scrollbar hidden.
+- **Slide-in sidebar drawer** — the full sidebar is still available via the hamburger button in the top app bar. Tap the backdrop or press Esc to dismiss. Tapping any sidebar nav item auto-dismisses the drawer.
+- **Content adaptations** — Dashboard's 6-tile KPI strip drops to 2 columns; section tabs become horizontal scroll-snap; wide tables scroll horizontally inside their wrappers; the two-column layouts collapse to single column.
+- **Safe area** — `env(safe-area-inset-bottom)` honored so the bottom nav clears the iPhone home indicator.
+
+No action needed to switch modes — resize the browser below 900px wide or use Chrome DevTools mobile emulation and the layout transitions automatically.
 
 ### Student / Tenant (desktop, left sidebar)
 - **Home** — welcome card + 4 action cards (My Room / Next Class Pickup / Rent Status / Open Maintenance)
