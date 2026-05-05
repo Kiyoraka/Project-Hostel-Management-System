@@ -593,6 +593,10 @@ textarea.field__input { resize: vertical; min-height: 80px; }
     border-top: 1px solid var(--ink-300);
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+  /* 5-column variant for tenant single-tier nav (Home/Room/Schedule/Maint/Pay) */
+  .bottom-nav__groups--five {
+    grid-template-columns: repeat(5, 1fr);
+  }
 
   .bottom-nav__group-item {
     display: flex;

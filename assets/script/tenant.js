@@ -7,6 +7,8 @@
 
   let currentUser = null;
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   document.addEventListener('DOMContentLoaded', function () {
     currentUser = auth.requireRole(['tenant']);
     if (!currentUser) return;
@@ -14,6 +16,9 @@
     initSidebar();
     initTopbar();
     initLogout();
+    initBottomNav();
+    initUserMenu();
+    initResponsiveReRender();
     paintUserChrome();
 
     ui.hashRouter({
@@ -34,6 +39,7 @@
 
   function initSidebar() {
     const items = document.querySelectorAll('[data-route]');
+    const mobileItems = document.querySelectorAll('[data-mobile-route]');
     function syncActive() {
       const hash = window.location.hash.replace(/^#/, '') || '/';
       items.forEach(it => {
@@ -42,9 +48,71 @@
         if (isActive) it.setAttribute('aria-current', 'page');
         else it.removeAttribute('aria-current');
       });
+      mobileItems.forEach(it => {
+        it.classList.toggle('is-active', it.dataset.mobileRoute === hash);
+      });
     }
     window.addEventListener('hashchange', syncActive);
     syncActive();
+  }
+
+  function initBottomNav() {
+    document.querySelectorAll('[data-mobile-route]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const target = link.dataset.mobileRoute;
+        const currentHash = window.location.hash.replace(/^#/, '') || '/';
+        if (target === currentHash) {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    });
+  }
+
+  function initUserMenu() {
+    const trigger = document.querySelector('[data-user-menu]');
+    const menu = document.querySelector('[data-user-dropdown]');
+    if (!trigger || !menu) return;
+
+    function open() {
+      menu.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+      menu.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.contains('is-open') ? close() : open();
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && !trigger.contains(e.target)) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('is-open')) close();
+    });
+    menu.querySelectorAll('.topbar__user-menu-item').forEach(item => {
+      item.addEventListener('click', () => close());
+    });
+  }
+
+  function initResponsiveReRender() {
+    let lastIsMobile = isMobile();
+    let timer = null;
+    window.addEventListener('resize', () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const nowIsMobile = isMobile();
+        if (nowIsMobile !== lastIsMobile) {
+          lastIsMobile = nowIsMobile;
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
+      }, 150);
+    });
   }
 
   function initTopbar() {
@@ -61,6 +129,7 @@
     const initials = (currentUser.name || '').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
     document.querySelectorAll('[data-user-avatar]').forEach(el => el.textContent = initials);
     document.querySelectorAll('[data-user-name]').forEach(el => el.textContent = currentUser.name);
+    document.querySelectorAll('[data-user-email]').forEach(el => el.textContent = currentUser.email || '');
   }
 
   function setPageTitle(title) {
@@ -70,5 +139,5 @@
 
   function content() { return document.getElementById('app-content'); }
 
-  window.tenant = { setPageTitle, getCurrentUser: () => currentUser };
+  window.tenant = { setPageTitle, getCurrentUser: () => currentUser, isMobile };
 })();

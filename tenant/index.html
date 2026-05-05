@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../assets/style/tokens.css">
   <link rel="stylesheet" href="../assets/style/base.css">
   <link rel="stylesheet" href="../assets/style/dashboard.css">
+  <link rel="stylesheet" href="../assets/style/admin.css">
   <link rel="stylesheet" href="../assets/style/tenant.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -92,10 +93,25 @@
         <i class="fa-solid fa-bell" aria-hidden="true"></i>
         <span class="topbar__bell-dot"></span>
       </button>
-      <div class="topbar__user" data-user-menu>
-        <div class="topbar__user-avatar" data-user-avatar>AF</div>
-        <span class="topbar__user-name" data-user-name>Ahmad Faiz</span>
-        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      <div class="topbar__user-wrap">
+        <button type="button" class="topbar__user" data-user-menu aria-expanded="false" aria-haspopup="menu" aria-label="Account menu">
+          <div class="topbar__user-avatar" data-user-avatar>AF</div>
+          <span class="topbar__user-name" data-user-name>Ahmad Faiz</span>
+          <i class="fa-solid fa-chevron-down topbar__user-chevron" aria-hidden="true"></i>
+        </button>
+        <div class="topbar__user-menu" data-user-dropdown role="menu" aria-hidden="true">
+          <div class="topbar__user-menu-header">
+            <div class="topbar__user-menu-name" data-user-name>Ahmad Faiz</div>
+            <div class="topbar__user-menu-email" data-user-email>student1@gmail.com</div>
+          </div>
+          <a class="topbar__user-menu-item" href="#/settings" role="menuitem">
+            <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span>
+          </a>
+          <div class="topbar__user-menu-divider"></div>
+          <button type="button" class="topbar__user-menu-item topbar__user-menu-item--danger" data-logout role="menuitem">
+            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -106,6 +122,31 @@
       <h3>Loading...</h3>
     </div>
   </main>
+
+  <nav class="bottom-nav" aria-label="Mobile navigation">
+    <div class="bottom-nav__groups bottom-nav__groups--five">
+      <a class="bottom-nav__group-item" href="#/" data-mobile-route="/" aria-label="Home">
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+        <span>Home</span>
+      </a>
+      <a class="bottom-nav__group-item" href="#/room" data-mobile-route="/room" aria-label="My Room">
+        <i class="fa-solid fa-bed" aria-hidden="true"></i>
+        <span>Room</span>
+      </a>
+      <a class="bottom-nav__group-item" href="#/schedule" data-mobile-route="/schedule" aria-label="Schedule">
+        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+        <span>Schedule</span>
+      </a>
+      <a class="bottom-nav__group-item" href="#/maintenance" data-mobile-route="/maintenance" aria-label="Maintenance">
+        <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+        <span>Maint</span>
+      </a>
+      <a class="bottom-nav__group-item" href="#/payments" data-mobile-route="/payments" aria-label="Payments">
+        <i class="fa-solid fa-credit-card" aria-hidden="true"></i>
+        <span>Pay</span>
+      </a>
+    </div>
+  </nav>
 
 </body>
 </html>
