@@ -103,8 +103,10 @@ When the admin dashboard opens at narrow widths (phone, tablet portrait, or DevT
 
 - **2-tier bottom navigation** — bottom row has 4 group tabs (Main / Operations / People / Account); a sub-row above it shows the routes inside the active group. Tap a group tab to swap the sub-row; tap a sub-row item to navigate. Tap the active group tab a second time to scroll content to top (iOS pattern).
 - **Sub-row scrolls horizontally** — long groups (Operations has 5 items) swipe naturally with scroll-snap, scrollbar hidden.
-- **Slide-in sidebar drawer** — the full sidebar is still available via the hamburger button in the top app bar. Tap the backdrop or press Esc to dismiss. Tapping any sidebar nav item auto-dismisses the drawer.
-- **Content adaptations** — Dashboard's 6-tile KPI strip drops to 2 columns; section tabs become horizontal scroll-snap; wide tables scroll horizontally inside their wrappers; the two-column layouts collapse to single column.
+- **No sidebar / no hamburger on mobile** — navigation flows exclusively through the bottom 2-tier nav. The desktop sidebar is hidden on mobile; less chrome, simpler mental model.
+- **Dedicated mobile Dashboard render** — the Main / Dashboard route ships its own mobile layout (separate from the desktop 10-widget grid): time-aware greeting, hero Occupancy card with 40px primary metric + thick progress bar, 2-col compact stats (Outstanding + Pending Maintenance), ALL-CAPS section labels (iOS pattern), Payment Status donut + Occupancy Trend chart, Recent Activity as a clean list card with internal dividers. Subsequent module pages (Hostel / Residents / etc.) currently use the responsive CSS adaptation from M1 and will get their own dedicated mobile renders in upcoming rounds.
+- **Content adaptations on other pages** — section tabs become horizontal scroll-snap; wide tables scroll horizontally inside their wrappers; two-column layouts collapse to single column.
+- **Auto-swap on resize** — if the browser is resized across the 900px boundary, the active section re-renders (debounced 150ms) so layout changes instantly without manual reload.
 - **Safe area** — `env(safe-area-inset-bottom)` honored so the bottom nav clears the iPhone home indicator.
 
 No action needed to switch modes — resize the browser below 900px wide or use Chrome DevTools mobile emulation and the layout transitions automatically.
