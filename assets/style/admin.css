@@ -394,68 +394,22 @@ textarea.field__input { resize: vertical; min-height: 80px; }
    (Phase M1 — only active on mobile width <=900px)
    ===================================================================== */
 
-/* Desktop default: hide all mobile-only chrome */
+/* Desktop default: hide bottom nav (mobile-only) */
 .bottom-nav { display: none; }
-.topbar__hamburger { display: none; }
-.sidebar-backdrop { display: none; }
 
 @media (max-width: 900px) {
 
-  /* ---- Off-canvas sidebar drawer ---- */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    max-width: 85vw;
-    transform: translateX(-100%);
-    transition: transform 250ms ease;
-    z-index: 50;
-    box-shadow: var(--shadow-modal);
-  }
-  .sidebar.is-open { transform: translateX(0); }
-
-  .sidebar-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.4);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 250ms ease;
-    z-index: 49;
-  }
-  .sidebar-backdrop.is-visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  /* ---- Hide sidebar entirely on mobile (bottom nav covers all routes) ---- */
+  .sidebar { display: none; }
 
   /* Reset any desktop layout that pushes content right of sidebar */
   .topbar { left: 0; }
   .dashboard-content { margin-left: 0; }
   body.is-collapsed .dashboard-content { margin-left: 0; }
 
-  /* ---- Topbar: show mobile hamburger, shrink title ---- */
-  .topbar__hamburger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-input);
-    background: transparent;
-    border: 0;
-    color: var(--ink-700);
-    cursor: pointer;
-    margin-right: var(--space-2);
-  }
-  .topbar__hamburger:hover { background: var(--surface-soft); }
-  .topbar__hamburger:active { background: var(--brand-tint); }
-  .topbar__title { font-size: 16px; }
-
-  /* Hide desktop sidebar collapse toggle on mobile (we use hamburger instead) */
+  /* Hide desktop sidebar collapse toggle on mobile (no sidebar to toggle) */
   .topbar__toggle { display: none; }
+  .topbar__title { font-size: 16px; }
 
   /* ---- Bottom nav (2-tier: sub-row above + group tabs) ---- */
   .bottom-nav {

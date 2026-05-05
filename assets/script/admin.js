@@ -65,7 +65,6 @@
     initTopbar();
     initLogout();
     initBottomNav();
-    initMobileSidebar();
     paintUserChrome();
 
     ui.hashRouter({
@@ -150,37 +149,6 @@
     }
   }
 
-  function initMobileSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const backdrop = document.querySelector('[data-sidebar-backdrop]');
-    const hamburger = document.querySelector('[data-mobile-menu]');
-    if (!sidebar || !backdrop || !hamburger) return;
-
-    function open() {
-      sidebar.classList.add('is-open');
-      backdrop.classList.add('is-visible');
-      backdrop.setAttribute('aria-hidden', 'false');
-    }
-    function close() {
-      sidebar.classList.remove('is-open');
-      backdrop.classList.remove('is-visible');
-      backdrop.setAttribute('aria-hidden', 'true');
-    }
-
-    hamburger.addEventListener('click', () => {
-      sidebar.classList.contains('is-open') ? close() : open();
-    });
-    backdrop.addEventListener('click', close);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && sidebar.classList.contains('is-open')) close();
-    });
-    // Close drawer when a sidebar nav link is tapped (mobile UX)
-    sidebar.querySelectorAll('.sidebar__nav-item').forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth <= 900) close();
-      });
-    });
-  }
 
   function initTopbar() {
     const toggle = document.querySelector('[data-sidebar-toggle]');
