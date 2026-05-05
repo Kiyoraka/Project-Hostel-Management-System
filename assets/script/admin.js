@@ -234,11 +234,31 @@
       renderMobileOverview(data);
       drawOccupancyChart(data.occupiedBeds, data.totalBeds, 'occupancy-chart-mobile');
       drawPaymentStatusChart(data.paidCount, data.dueCount, data.overdueCount, 'payment-status-chart-mobile');
+      initMobileCarousel();
     } else {
       renderDesktopOverview(data);
       drawOccupancyChart(data.occupiedBeds, data.totalBeds);
       drawPaymentStatusChart(data.paidCount, data.dueCount, data.overdueCount);
     }
+  }
+
+  function initMobileCarousel() {
+    const carousel = document.getElementById('dash-carousel');
+    if (!carousel) return;
+    const dots = document.querySelectorAll('.m-carousel__pager button');
+    let lastIndex = 0;
+    carousel.addEventListener('scroll', () => {
+      const index = Math.round(carousel.scrollLeft / Math.max(1, carousel.clientWidth));
+      if (index !== lastIndex) {
+        lastIndex = index;
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
+      }
+    }, { passive: true });
+    dots.forEach((d, i) => {
+      d.addEventListener('click', () => {
+        carousel.scrollTo({ left: i * carousel.clientWidth, behavior: 'smooth' });
+      });
+    });
   }
 
   function renderDesktopOverview(d) {
@@ -364,26 +384,54 @@
         </div>
       </div>
 
-      <div class="m-section-label">Payment Status</div>
-      <div class="card card-pad">
-        <div style="position: relative; height: 200px;">
-          <canvas id="payment-status-chart-mobile"></canvas>
+      <div class="m-section-label">Insights <span class="m-carousel-hint">swipe to view all</span></div>
+      <div class="m-carousel" id="dash-carousel" role="region" aria-label="Dashboard insights carousel">
+        <div class="m-carousel__slide">
+          <div class="card card-pad">
+            <h4 class="m-carousel__title">Payment Status</h4>
+            <div style="position: relative; height: 180px;">
+              <canvas id="payment-status-chart-mobile"></canvas>
+            </div>
+            <div class="payment-status-legend">
+              <span><i class="dot dot--paid"></i> Paid (${d.paidCount})</span>
+              <span><i class="dot dot--due"></i> Due (${d.dueCount})</span>
+              <span><i class="dot dot--overdue"></i> Overdue (${d.overdueCount})</span>
+            </div>
+          </div>
         </div>
-        <div class="payment-status-legend">
-          <span><i class="dot dot--paid"></i> Paid (${d.paidCount})</span>
-          <span><i class="dot dot--due"></i> Due (${d.dueCount})</span>
-          <span><i class="dot dot--overdue"></i> Overdue (${d.overdueCount})</span>
+        <div class="m-carousel__slide">
+          <div class="card card-pad">
+            <h4 class="m-carousel__title">Occupancy Trend <span class="m-carousel__sub">last 30 days</span></h4>
+            <div style="position: relative; height: 200px;">
+              <canvas id="occupancy-chart-mobile"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="m-carousel__slide">
+          <div class="card card-pad">
+            <h4 class="m-carousel__title">Recent Activity</h4>
+            <ul class="m-carousel__activity">
+              ${d.activity.slice(0, 5).map(a => `
+                <li class="m-carousel__activity-row">
+                  <i class="fa-solid ${a.icon} activity-feed__icon activity-feed__icon--${a.kind}" aria-hidden="true"></i>
+                  <div class="m-list-card__main">
+                    <span class="m-list-card__title">${ui.escapeHtml(a.title)}</span>
+                    <span class="m-list-card__meta">${ui.escapeHtml(a.meta)}</span>
+                  </div>
+                  <span class="m-list-card__time">${ui.escapeHtml(a.time)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
         </div>
       </div>
-
-      <div class="m-section-label">Occupancy Trend</div>
-      <div class="card card-pad">
-        <div style="position: relative; height: 200px;">
-          <canvas id="occupancy-chart-mobile"></canvas>
-        </div>
+      <div class="m-carousel__pager" role="tablist" aria-label="Insight pages">
+        <button type="button" data-page="0" class="is-active" aria-label="Payment Status"></button>
+        <button type="button" data-page="1" aria-label="Occupancy Trend"></button>
+        <button type="button" data-page="2" aria-label="Recent Activity"></button>
       </div>
 
-      <div class="m-section-label">Recent Activity</div>
+      <div class="m-section-label">Recent Activity (full)</div>
       <div class="m-list-card">
         ${d.activity.map((a, i) => `
           <div class="m-list-card__row">

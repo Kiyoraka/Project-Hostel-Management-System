@@ -699,4 +699,82 @@ textarea.field__input { resize: vertical; min-height: 80px; }
   .m-section-label + .card .room-status-grid__cell {
     max-width: 22px;
   }
+
+  /* ---- Insights carousel (Payment / Occupancy / Activity swipeable) ---- */
+  .m-carousel {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: var(--space-2);
+    -webkit-overflow-scrolling: touch;
+  }
+  .m-carousel::-webkit-scrollbar { display: none; }
+  .m-carousel__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+  .m-carousel__slide .card {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .m-carousel__title {
+    margin: 0 0 var(--space-3) 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-700);
+  }
+  .m-carousel__sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--ink-500);
+    margin-left: 6px;
+  }
+  .m-carousel-hint {
+    font-size: 10px;
+    color: var(--ink-400);
+    margin-left: 8px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .m-carousel__activity {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .m-carousel__activity-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--surface-soft);
+  }
+  .m-carousel__activity-row:last-child { border-bottom: 0; }
+  .m-carousel__pager {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 0 var(--space-3);
+  }
+  .m-carousel__pager button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ink-300);
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    transition: background 200ms, width 200ms, border-radius 200ms;
+  }
+  .m-carousel__pager button:hover { background: var(--ink-500); }
+  .m-carousel__pager button.is-active {
+    background: var(--brand-primary);
+    width: 24px;
+    border-radius: 4px;
+  }
 }
