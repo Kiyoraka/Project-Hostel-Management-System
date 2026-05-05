@@ -24,7 +24,15 @@
   <script defer src="../assets/script/admin-rooms.js"></script>
   <script defer src="../assets/script/admin-rentals.js"></script>
   <script defer src="../assets/script/admin-maintenance.js"></script>
+  <script defer src="../assets/script/admin-maintenance-tabbed.js"></script>
   <script defer src="../assets/script/admin-settings.js"></script>
+  <script defer src="../assets/script/admin-hostel.js"></script>
+  <script defer src="../assets/script/admin-residents.js"></script>
+  <script defer src="../assets/script/admin-transportation.js"></script>
+  <script defer src="../assets/script/admin-billing.js"></script>
+  <script defer src="../assets/script/admin-staff.js"></script>
+  <script defer src="../assets/script/admin-helpdesk.js"></script>
+  <script defer src="../assets/script/admin-profile.js"></script>
   <script defer src="../assets/script/admin.js"></script>
 </head>
 <body class="dashboard-body">
@@ -39,29 +47,46 @@
       <div class="sidebar__section">
         <div class="sidebar__section-title">Main</div>
         <a class="sidebar__nav-item" href="#/" data-route="/">
-          <i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Overview</span>
+          <i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Dashboard</span>
         </a>
       </div>
 
       <div class="sidebar__section">
-        <div class="sidebar__section-title">Manage</div>
-        <a class="sidebar__nav-item" href="#/users" data-route="/users">
-          <i class="fa-solid fa-users" aria-hidden="true"></i><span>Users</span>
+        <div class="sidebar__section-title">Operations</div>
+        <a class="sidebar__nav-item" href="#/hostel" data-route="/hostel">
+          <i class="fa-solid fa-building" aria-hidden="true"></i><span>Hostel Management</span>
         </a>
-        <a class="sidebar__nav-item" href="#/rooms" data-route="/rooms">
-          <i class="fa-solid fa-bed" aria-hidden="true"></i><span>Rooms</span>
-        </a>
-        <a class="sidebar__nav-item" href="#/rentals" data-route="/rentals">
-          <i class="fa-solid fa-money-bill" aria-hidden="true"></i><span>Rentals</span>
+        <a class="sidebar__nav-item" href="#/residents" data-route="/residents">
+          <i class="fa-solid fa-users" aria-hidden="true"></i><span>Resident Management</span>
         </a>
         <a class="sidebar__nav-item" href="#/maintenance" data-route="/maintenance">
           <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i><span>Maintenance</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/transportation" data-route="/transportation">
+          <i class="fa-solid fa-van-shuttle" aria-hidden="true"></i><span>Transportation</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/billing" data-route="/billing">
+          <i class="fa-solid fa-money-bill-wave" aria-hidden="true"></i><span>Billings &amp; Payment</span>
+        </a>
+      </div>
+
+      <div class="sidebar__section">
+        <div class="sidebar__section-title">People</div>
+        <a class="sidebar__nav-item" href="#/staff" data-route="/staff">
+          <i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>Staff &amp; Users</span>
+        </a>
+        <a class="sidebar__nav-item" href="#/helpdesk" data-route="/helpdesk">
+          <i class="fa-solid fa-life-ring" aria-hidden="true"></i><span>Helpdesk</span>
         </a>
       </div>
 
       <div class="sidebar__divider"></div>
 
       <div class="sidebar__section">
+        <div class="sidebar__section-title">Account</div>
+        <a class="sidebar__nav-item" href="#/profile" data-route="/profile">
+          <i class="fa-solid fa-id-card" aria-hidden="true"></i><span>Profile</span>
+        </a>
         <a class="sidebar__nav-item" href="#/settings" data-route="/settings">
           <i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span>
         </a>
