@@ -66,6 +66,7 @@
     initLogout();
     initBottomNav();
     paintUserChrome();
+    initResponsiveReRender();
 
     ui.hashRouter({
       '/':               initOverview,
@@ -179,37 +180,72 @@
     return document.getElementById('app-content');
   }
 
+  function isMobile() { return window.innerWidth <= 900; }
+
+  function initResponsiveReRender() {
+    let lastIsMobile = isMobile();
+    let timer = null;
+    window.addEventListener('resize', () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const nowIsMobile = isMobile();
+        if (nowIsMobile !== lastIsMobile) {
+          lastIsMobile = nowIsMobile;
+          // Re-fire current route handler so the active section re-renders
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        }
+      }, 150);
+    });
+  }
+
+  function greetingFor(date) {
+    const h = date.getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 18) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   /* ===================================================================
-     Section: Dashboard (10 widgets across 3 rows)
+     Section: Dashboard — branches by viewport (Phase MD1)
      =================================================================== */
   function initOverview() {
     setPageTitle('Dashboard');
     const rooms = store.readAll('rooms');
-    const totalBeds = rooms.length;
-    const occupiedBeds = rooms.filter(r => r.status === 'occupied').length;
-    const availableBeds = rooms.filter(r => r.status === 'vacant').length;
-    const maintRooms = rooms.filter(r => r.status === 'maintenance').length;
-    const occupancyRate = totalBeds ? Math.round(occupiedBeds / totalBeds * 100) : 0;
-
     const payments = store.readAll('payments');
-    const paidCount = payments.filter(p => p.status === 'paid').length;
-    const dueCount = payments.filter(p => p.status === 'due').length;
-    const overdueCount = payments.filter(p => p.status === 'late' || p.status === 'overdue').length;
-    const outstanding = payments
-      .filter(p => p.status !== 'paid')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-
     const maintenance = store.readAll('maintenance');
-    const pendingMaint = maintenance.filter(m => m.status !== 'resolved').length;
-
     const pickups = store.readAll('pickups');
 
+    const data = {
+      totalBeds: rooms.length,
+      occupiedBeds: rooms.filter(r => r.status === 'occupied').length,
+      availableBeds: rooms.filter(r => r.status === 'vacant').length,
+      maintRooms: rooms.filter(r => r.status === 'maintenance').length,
+      paidCount: payments.filter(p => p.status === 'paid').length,
+      dueCount: payments.filter(p => p.status === 'due').length,
+      overdueCount: payments.filter(p => p.status === 'late' || p.status === 'overdue').length,
+      outstanding: payments.filter(p => p.status !== 'paid').reduce((s, p) => s + (p.amount || 0), 0),
+      pendingMaint: maintenance.filter(m => m.status !== 'resolved').length,
+      rooms: rooms,
+      activity: buildRecentActivity(maintenance, payments, pickups, isMobile() ? 6 : 8)
+    };
+    data.occupancyRate = data.totalBeds ? Math.round(data.occupiedBeds / data.totalBeds * 100) : 0;
+
+    if (isMobile()) {
+      renderMobileOverview(data);
+      drawOccupancyChart(data.occupiedBeds, data.totalBeds, 'occupancy-chart-mobile');
+      drawPaymentStatusChart(data.paidCount, data.dueCount, data.overdueCount, 'payment-status-chart-mobile');
+    } else {
+      renderDesktopOverview(data);
+      drawOccupancyChart(data.occupiedBeds, data.totalBeds);
+      drawPaymentStatusChart(data.paidCount, data.dueCount, data.overdueCount);
+    }
+  }
+
+  function renderDesktopOverview(d) {
     const today = new Date();
     const todayStr = today.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
-    const activity = buildRecentActivity(maintenance, payments, pickups, 8);
-
-    const html = `
+    content().innerHTML = `
       <div class="section-header">
         <div>
           <div class="section-title">Hello, ${ui.escapeHtml(currentUser.name)}</div>
@@ -218,48 +254,24 @@
       </div>
 
       <div class="kpi-strip">
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Total Beds</div>
-          <div class="kpi-tile__value">${totalBeds}</div>
-          <div class="kpi-tile__delta">across all blocks</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Occupied Beds</div>
-          <div class="kpi-tile__value">${occupiedBeds}</div>
-          <div class="kpi-tile__delta kpi-tile__delta--up">in use now</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Available Beds</div>
-          <div class="kpi-tile__value">${availableBeds}</div>
-          <div class="kpi-tile__delta">ready to assign</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Occupancy Rate</div>
-          <div class="kpi-tile__value">${occupancyRate}%</div>
-          <div class="kpi-tile__delta">${occupiedBeds} of ${totalBeds}</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Outstanding</div>
-          <div class="kpi-tile__value">${ui.formatMoney(outstanding)}</div>
-          <div class="kpi-tile__delta kpi-tile__delta--down">${dueCount + overdueCount} unpaid</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile__label">Pending Maint.</div>
-          <div class="kpi-tile__value">${pendingMaint}</div>
-          <div class="kpi-tile__delta">open reports</div>
-        </div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Total Beds</div><div class="kpi-tile__value">${d.totalBeds}</div><div class="kpi-tile__delta">across all blocks</div></div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Occupied Beds</div><div class="kpi-tile__value">${d.occupiedBeds}</div><div class="kpi-tile__delta kpi-tile__delta--up">in use now</div></div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Available Beds</div><div class="kpi-tile__value">${d.availableBeds}</div><div class="kpi-tile__delta">ready to assign</div></div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Occupancy Rate</div><div class="kpi-tile__value">${d.occupancyRate}%</div><div class="kpi-tile__delta">${d.occupiedBeds} of ${d.totalBeds}</div></div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Outstanding</div><div class="kpi-tile__value">${ui.formatMoney(d.outstanding)}</div><div class="kpi-tile__delta kpi-tile__delta--down">${d.dueCount + d.overdueCount} unpaid</div></div>
+        <div class="kpi-tile"><div class="kpi-tile__label">Pending Maint.</div><div class="kpi-tile__value">${d.pendingMaint}</div><div class="kpi-tile__delta">open reports</div></div>
       </div>
 
       <div class="two-col">
         <div class="card card-pad">
           <h3 class="mb-3">Room Status</h3>
           <div class="room-status-grid">
-            ${rooms.map(r => `<span class="room-status-grid__cell room-status-grid__cell--${ui.escapeHtml(r.status)}" title="${ui.escapeHtml(r.id)} - ${ui.escapeHtml(r.status)}"></span>`).join('')}
+            ${d.rooms.map(r => `<span class="room-status-grid__cell room-status-grid__cell--${ui.escapeHtml(r.status)}" title="${ui.escapeHtml(r.id)} - ${ui.escapeHtml(r.status)}"></span>`).join('')}
           </div>
           <div class="room-status-grid__legend">
-            <span><i class="dot dot--occupied"></i> Occupied (${occupiedBeds})</span>
-            <span><i class="dot dot--vacant"></i> Vacant (${availableBeds})</span>
-            <span><i class="dot dot--maintenance"></i> Maintenance (${maintRooms})</span>
+            <span><i class="dot dot--occupied"></i> Occupied (${d.occupiedBeds})</span>
+            <span><i class="dot dot--vacant"></i> Vacant (${d.availableBeds})</span>
+            <span><i class="dot dot--maintenance"></i> Maintenance (${d.maintRooms})</span>
           </div>
         </div>
 
@@ -269,9 +281,9 @@
             <canvas id="payment-status-chart"></canvas>
           </div>
           <div class="payment-status-legend">
-            <span><i class="dot dot--paid"></i> Paid (${paidCount})</span>
-            <span><i class="dot dot--due"></i> Due (${dueCount})</span>
-            <span><i class="dot dot--overdue"></i> Overdue (${overdueCount})</span>
+            <span><i class="dot dot--paid"></i> Paid (${d.paidCount})</span>
+            <span><i class="dot dot--due"></i> Due (${d.dueCount})</span>
+            <span><i class="dot dot--overdue"></i> Overdue (${d.overdueCount})</span>
           </div>
         </div>
       </div>
@@ -287,7 +299,7 @@
         <div class="card card-pad">
           <h3 class="mb-3">Recent Activity</h3>
           <ul class="activity-feed">
-            ${activity.map(a => `
+            ${d.activity.map(a => `
               <li class="activity-feed__item">
                 <i class="fa-solid ${a.icon} activity-feed__icon activity-feed__icon--${a.kind}" aria-hidden="true"></i>
                 <div class="activity-feed__main">
@@ -301,10 +313,90 @@
         </div>
       </div>
     `;
-    content().innerHTML = html;
+  }
 
-    drawOccupancyChart(occupiedBeds, totalBeds);
-    drawPaymentStatusChart(paidCount, dueCount, overdueCount);
+  function renderMobileOverview(d) {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const greeting = greetingFor(today);
+
+    content().innerHTML = `
+      <div class="m-greeting">
+        <div class="m-greeting__hello">${greeting}, ${ui.escapeHtml(currentUser.name)}</div>
+        <div class="m-greeting__date">${dateStr}</div>
+      </div>
+
+      <div class="m-hero-card">
+        <div class="m-hero-card__label">Occupancy</div>
+        <div class="m-hero-card__value">${d.occupancyRate}%</div>
+        <div class="m-hero-card__bar">
+          <div class="m-hero-card__bar-fill" style="width: ${d.occupancyRate}%;"></div>
+        </div>
+        <div class="m-hero-card__summary">
+          <span><i class="dot dot--occupied"></i> ${d.occupiedBeds} occupied</span>
+          <span><i class="dot dot--vacant"></i> ${d.availableBeds} vacant</span>
+          <span><i class="dot dot--maintenance"></i> ${d.maintRooms} maint.</span>
+        </div>
+      </div>
+
+      <div class="m-stats-row">
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Outstanding</div>
+          <div class="m-stat-card__value">${ui.formatMoney(d.outstanding)}</div>
+          <div class="m-stat-card__delta m-stat-card__delta--down">${d.dueCount + d.overdueCount} unpaid</div>
+        </div>
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Pending Maint.</div>
+          <div class="m-stat-card__value">${d.pendingMaint}</div>
+          <div class="m-stat-card__delta">open reports</div>
+        </div>
+      </div>
+
+      <div class="m-section-label">Room Status</div>
+      <div class="card card-pad">
+        <div class="room-status-grid">
+          ${d.rooms.map(r => `<span class="room-status-grid__cell room-status-grid__cell--${ui.escapeHtml(r.status)}" title="${ui.escapeHtml(r.id)} - ${ui.escapeHtml(r.status)}"></span>`).join('')}
+        </div>
+        <div class="room-status-grid__legend">
+          <span><i class="dot dot--occupied"></i> Occupied (${d.occupiedBeds})</span>
+          <span><i class="dot dot--vacant"></i> Vacant (${d.availableBeds})</span>
+          <span><i class="dot dot--maintenance"></i> Maintenance (${d.maintRooms})</span>
+        </div>
+      </div>
+
+      <div class="m-section-label">Payment Status</div>
+      <div class="card card-pad">
+        <div style="position: relative; height: 200px;">
+          <canvas id="payment-status-chart-mobile"></canvas>
+        </div>
+        <div class="payment-status-legend">
+          <span><i class="dot dot--paid"></i> Paid (${d.paidCount})</span>
+          <span><i class="dot dot--due"></i> Due (${d.dueCount})</span>
+          <span><i class="dot dot--overdue"></i> Overdue (${d.overdueCount})</span>
+        </div>
+      </div>
+
+      <div class="m-section-label">Occupancy Trend</div>
+      <div class="card card-pad">
+        <div style="position: relative; height: 200px;">
+          <canvas id="occupancy-chart-mobile"></canvas>
+        </div>
+      </div>
+
+      <div class="m-section-label">Recent Activity</div>
+      <div class="m-list-card">
+        ${d.activity.map((a, i) => `
+          <div class="m-list-card__row">
+            <i class="fa-solid ${a.icon} activity-feed__icon activity-feed__icon--${a.kind}" aria-hidden="true"></i>
+            <div class="m-list-card__main">
+              <span class="m-list-card__title">${ui.escapeHtml(a.title)}</span>
+              <span class="m-list-card__meta">${ui.escapeHtml(a.meta)}</span>
+            </div>
+            <span class="m-list-card__time">${ui.escapeHtml(a.time)}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
   }
 
   function buildRecentActivity(maintenance, payments, pickups, limit) {
@@ -342,8 +434,8 @@
     return items.sort((a, b) => b.ts - a.ts).slice(0, limit);
   }
 
-  function drawPaymentStatusChart(paid, due, overdue) {
-    const canvas = document.getElementById('payment-status-chart');
+  function drawPaymentStatusChart(paid, due, overdue, canvasId) {
+    const canvas = document.getElementById(canvasId || 'payment-status-chart');
     if (!canvas || !window.Chart) return;
     new Chart(canvas, {
       type: 'doughnut',
@@ -364,8 +456,8 @@
     });
   }
 
-  function drawOccupancyChart(currentOcc, total) {
-    const canvas = document.getElementById('occupancy-chart');
+  function drawOccupancyChart(currentOcc, total, canvasId) {
+    const canvas = document.getElementById(canvasId || 'occupancy-chart');
     if (!canvas || !window.Chart) return;
     const days = 30;
     const data = [];
