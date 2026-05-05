@@ -75,103 +75,188 @@
   }
 
   /* ===================================================================
-     Section: Overview
+     Section: Dashboard (10 widgets across 3 rows)
      =================================================================== */
   function initOverview() {
-    setPageTitle('Overview');
-    const tenants = auth.listUsers().filter(u => u.role === 'tenant');
-    const extras = store.readAll('extra_tenants');
-    const tenantCount = tenants.length + extras.length;
+    setPageTitle('Dashboard');
     const rooms = store.readAll('rooms');
-    const occupied = rooms.filter(r => r.status === 'occupied').length;
-    const totalRooms = rooms.length;
-    const maintenance = store.readAll('maintenance');
-    const openMaint = maintenance.filter(m => m.status !== 'resolved').length;
-    const urgent = maintenance.filter(m => m.urgency === 'high' && m.status !== 'resolved').length;
-    const pickups = store.readAll('pickups');
-    const todayPickups = pickups.length;
-    const todayDone = pickups.filter(p => p.status === 'completed').length;
+    const totalBeds = rooms.length;
+    const occupiedBeds = rooms.filter(r => r.status === 'occupied').length;
+    const availableBeds = rooms.filter(r => r.status === 'vacant').length;
+    const maintRooms = rooms.filter(r => r.status === 'maintenance').length;
+    const occupancyRate = totalBeds ? Math.round(occupiedBeds / totalBeds * 100) : 0;
 
-    const recentMaint = [...maintenance].sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt)).slice(0, 5);
-    const schedules = store.readAll('schedules');
+    const payments = store.readAll('payments');
+    const paidCount = payments.filter(p => p.status === 'paid').length;
+    const dueCount = payments.filter(p => p.status === 'due').length;
+    const overdueCount = payments.filter(p => p.status === 'late' || p.status === 'overdue').length;
+    const outstanding = payments
+      .filter(p => p.status !== 'paid')
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const maintenance = store.readAll('maintenance');
+    const pendingMaint = maintenance.filter(m => m.status !== 'resolved').length;
+
+    const pickups = store.readAll('pickups');
 
     const today = new Date();
     const todayStr = today.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
+    const activity = buildRecentActivity(maintenance, payments, pickups, 8);
+
     const html = `
       <div class="section-header">
         <div>
-          <div class="section-title">Hello, ${ui.escapeHtml(currentUser.name)} 👋</div>
+          <div class="section-title">Hello, ${ui.escapeHtml(currentUser.name)}</div>
           <div class="section-subtitle">Today: ${todayStr}</div>
         </div>
       </div>
 
-      <div class="kpi-grid">
+      <div class="kpi-strip">
         <div class="kpi-tile">
-          <div class="kpi-tile__label">Tenants</div>
-          <div class="kpi-tile__value">${tenantCount}</div>
-          <div class="kpi-tile__delta kpi-tile__delta--up"><i class="fa-solid fa-arrow-up"></i> +3 this week</div>
+          <div class="kpi-tile__label">Total Beds</div>
+          <div class="kpi-tile__value">${totalBeds}</div>
+          <div class="kpi-tile__delta">across all blocks</div>
         </div>
         <div class="kpi-tile">
-          <div class="kpi-tile__label">Rooms</div>
-          <div class="kpi-tile__value">${occupied} / ${totalRooms}</div>
-          <div class="kpi-tile__delta">${Math.round(occupied / totalRooms * 100)}% occupancy</div>
+          <div class="kpi-tile__label">Occupied Beds</div>
+          <div class="kpi-tile__value">${occupiedBeds}</div>
+          <div class="kpi-tile__delta kpi-tile__delta--up">in use now</div>
         </div>
         <div class="kpi-tile">
-          <div class="kpi-tile__label">Open maintenance</div>
-          <div class="kpi-tile__value">${openMaint}</div>
-          <div class="kpi-tile__delta kpi-tile__delta--down">${urgent} urgent</div>
+          <div class="kpi-tile__label">Available Beds</div>
+          <div class="kpi-tile__value">${availableBeds}</div>
+          <div class="kpi-tile__delta">ready to assign</div>
         </div>
         <div class="kpi-tile">
-          <div class="kpi-tile__label">Today's pickups</div>
-          <div class="kpi-tile__value">${todayPickups}</div>
-          <div class="kpi-tile__delta">${todayDone} completed</div>
+          <div class="kpi-tile__label">Occupancy Rate</div>
+          <div class="kpi-tile__value">${occupancyRate}%</div>
+          <div class="kpi-tile__delta">${occupiedBeds} of ${totalBeds}</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-tile__label">Outstanding</div>
+          <div class="kpi-tile__value">${ui.formatMoney(outstanding)}</div>
+          <div class="kpi-tile__delta kpi-tile__delta--down">${dueCount + overdueCount} unpaid</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-tile__label">Pending Maint.</div>
+          <div class="kpi-tile__value">${pendingMaint}</div>
+          <div class="kpi-tile__delta">open reports</div>
         </div>
       </div>
 
       <div class="two-col">
         <div class="card card-pad">
-          <h3 class="mb-3">Recent Maintenance Reports</h3>
-          <ul class="recent-list">
-            ${recentMaint.map(m => `
-              <li class="recent-list__item">
-                <div class="recent-list__main">
-                  <span class="recent-list__title">${ui.escapeHtml(m.roomId)} - ${ui.escapeHtml(m.title)}</span>
-                  <span class="recent-list__meta">${ui.escapeHtml(m.reportedBy)}</span>
-                </div>
-                <span class="recent-list__time">${ui.formatRelative(m.reportedAt)}</span>
-              </li>
-            `).join('')}
-          </ul>
-          <div class="mt-3"><a href="#/maintenance" class="btn btn-ghost btn-sm">View all <i class="fa-solid fa-arrow-right"></i></a></div>
+          <h3 class="mb-3">Room Status</h3>
+          <div class="room-status-grid">
+            ${rooms.map(r => `<span class="room-status-grid__cell room-status-grid__cell--${ui.escapeHtml(r.status)}" title="${ui.escapeHtml(r.id)} - ${ui.escapeHtml(r.status)}"></span>`).join('')}
+          </div>
+          <div class="room-status-grid__legend">
+            <span><i class="dot dot--occupied"></i> Occupied (${occupiedBeds})</span>
+            <span><i class="dot dot--vacant"></i> Vacant (${availableBeds})</span>
+            <span><i class="dot dot--maintenance"></i> Maintenance (${maintRooms})</span>
+          </div>
         </div>
 
         <div class="card card-pad">
-          <h3 class="mb-3">Upcoming Pickups</h3>
-          <ul class="recent-list">
-            ${schedules.slice(0, 5).map(s => `
-              <li class="recent-list__item">
-                <div class="recent-list__main">
-                  <span class="recent-list__title">${ui.escapeHtml(s.startTime)} - ${ui.escapeHtml(s.studentId)}</span>
-                  <span class="recent-list__meta">${ui.escapeHtml(s.pickupLocation)}</span>
-                </div>
-                <span class="recent-list__time">${ui.escapeHtml(s.day)}</span>
-              </li>
-            `).join('')}
-          </ul>
+          <h3 class="mb-3">Payment Status</h3>
+          <div style="position: relative; height: 200px;">
+            <canvas id="payment-status-chart"></canvas>
+          </div>
+          <div class="payment-status-legend">
+            <span><i class="dot dot--paid"></i> Paid (${paidCount})</span>
+            <span><i class="dot dot--due"></i> Due (${dueCount})</span>
+            <span><i class="dot dot--overdue"></i> Overdue (${overdueCount})</span>
+          </div>
         </div>
       </div>
 
-      <div class="card card-pad">
-        <h3 class="mb-3">Occupancy Trend (last 30 days)</h3>
-        <div style="position: relative; height: 240px;">
-          <canvas id="occupancy-chart"></canvas>
+      <div class="two-col two-col--wide-left">
+        <div class="card card-pad">
+          <h3 class="mb-3">Occupancy Summary (last 30 days)</h3>
+          <div style="position: relative; height: 240px;">
+            <canvas id="occupancy-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <h3 class="mb-3">Recent Activity</h3>
+          <ul class="activity-feed">
+            ${activity.map(a => `
+              <li class="activity-feed__item">
+                <i class="fa-solid ${a.icon} activity-feed__icon activity-feed__icon--${a.kind}" aria-hidden="true"></i>
+                <div class="activity-feed__main">
+                  <span class="activity-feed__title">${ui.escapeHtml(a.title)}</span>
+                  <span class="activity-feed__meta">${ui.escapeHtml(a.meta)}</span>
+                </div>
+                <span class="activity-feed__time">${ui.escapeHtml(a.time)}</span>
+              </li>
+            `).join('')}
+          </ul>
         </div>
       </div>
     `;
     content().innerHTML = html;
 
-    drawOccupancyChart(occupied, totalRooms);
+    drawOccupancyChart(occupiedBeds, totalBeds);
+    drawPaymentStatusChart(paidCount, dueCount, overdueCount);
+  }
+
+  function buildRecentActivity(maintenance, payments, pickups, limit) {
+    const items = [];
+    maintenance.forEach(m => {
+      items.push({
+        kind: 'maintenance',
+        icon: 'fa-screwdriver-wrench',
+        title: `${m.roomId} - ${m.title}`,
+        meta: `Reported by ${m.reportedBy}`,
+        ts: new Date(m.reportedAt).getTime(),
+        time: ui.formatRelative(m.reportedAt)
+      });
+    });
+    payments.filter(p => p.status === 'paid' && p.paidOn).forEach(p => {
+      items.push({
+        kind: 'payment',
+        icon: 'fa-money-bill-wave',
+        title: `${ui.formatMoney(p.amount)} - ${p.tenantName}`,
+        meta: `${p.method} payment for ${ui.formatPeriod(p.period)}`,
+        ts: new Date(p.paidOn).getTime(),
+        time: ui.formatRelative(p.paidOn)
+      });
+    });
+    pickups.forEach(p => {
+      items.push({
+        kind: 'pickup',
+        icon: 'fa-van-shuttle',
+        title: `Pickup - ${p.classLabel}`,
+        meta: `${p.studentCount} student${p.studentCount === 1 ? '' : 's'} - ${p.status}`,
+        ts: new Date(p.date).getTime(),
+        time: ui.formatRelative(p.date)
+      });
+    });
+    return items.sort((a, b) => b.ts - a.ts).slice(0, limit);
+  }
+
+  function drawPaymentStatusChart(paid, due, overdue) {
+    const canvas = document.getElementById('payment-status-chart');
+    if (!canvas || !window.Chart) return;
+    new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Paid', 'Due', 'Overdue'],
+        datasets: [{
+          data: [paid, due, overdue],
+          backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: { legend: { display: false } }
+      }
+    });
   }
 
   function drawOccupancyChart(currentOcc, total) {
