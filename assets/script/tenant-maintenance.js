@@ -5,9 +5,73 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   window.tenantMaintenanceInit = function ({ content, currentUser }) {
-    render(content, currentUser);
+    if (isMobile()) {
+      renderMobile(content, currentUser);
+    } else {
+      render(content, currentUser);
+    }
   };
+
+  function renderMobile(content, currentUser) {
+    const reports = [...store.filter('maintenance', m => m.userId === currentUser.id)]
+      .sort((a, b) => new Date(b.reportedAt) - new Date(a.reportedAt));
+    const open = reports.filter(r => r.status !== 'resolved').length;
+    const resolved = reports.filter(r => r.status === 'resolved').length;
+
+    content.innerHTML = `
+      <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+        <div class="m-greeting__hello">My Maintenance</div>
+        <div class="m-greeting__date">${reports.length} report${reports.length === 1 ? '' : 's'} for ${ui.escapeHtml(currentUser.roomId)}</div>
+      </div>
+
+      <div class="m-stats-row">
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Open</div>
+          <div class="m-stat-card__value">${open}</div>
+          <div class="m-stat-card__delta ${open > 0 ? 'm-stat-card__delta--down' : ''}">${open === 0 ? 'all clear' : 'pending'}</div>
+        </div>
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Resolved</div>
+          <div class="m-stat-card__value">${resolved}</div>
+          <div class="m-stat-card__delta">closed</div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" data-submit style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Submit Report
+      </button>
+
+      <div class="m-section-label">My Reports <span class="m-carousel-hint">${reports.length}</span></div>
+      <div class="m-list-card">
+        ${reports.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No reports yet — tap Submit Report</div>'
+          : reports.map(r => `
+            <div class="m-list-card__row m-room-row" data-view="${ui.escapeHtml(r.id)}">
+              <i class="fa-solid fa-screwdriver-wrench activity-feed__icon activity-feed__icon--${r.status === 'resolved' ? 'payment' : 'maintenance'}" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.escapeHtml(r.id)} &middot; ${ui.escapeHtml(r.title)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(r.category || '')} &middot; ${urgencyText(r.urgency)} urgency</span>
+                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.formatRelative(r.reportedAt)}</span>
+              </div>
+              <span class="badge badge--${r.status === 'resolved' ? 'success' : r.status === 'in_progress' ? 'warning' : 'info'}" style="font-size: 10px; flex-shrink: 0;">${ui.escapeHtml((r.status || '').replace('_', ' ').toUpperCase())}</span>
+            </div>
+          `).join('')}
+      </div>
+    `;
+
+    content.querySelector('[data-submit]').addEventListener('click', () => openSubmitModal(content, currentUser));
+    content.querySelectorAll('[data-view]').forEach(b => {
+      b.addEventListener('click', () => openViewDrawer(b.dataset.view));
+    });
+  }
+
+  function urgencyText(u) {
+    if (u === 'high') return 'High';
+    if (u === 'medium') return 'Medium';
+    return 'Low';
+  }
 
   function render(content, currentUser) {
     const reports = [...store.filter('maintenance', m => m.userId === currentUser.id)]

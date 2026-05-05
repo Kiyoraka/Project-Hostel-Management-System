@@ -8,13 +8,102 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   const PICKUP_WINDOW_MIN = 15;
   let scanner = null;
 
   window.tenantScheduleInit = function ({ content, currentUser }) {
     cleanupScanner();
-    renderList(content, currentUser);
+    if (isMobile()) {
+      renderMobileList(content, currentUser);
+    } else {
+      renderList(content, currentUser);
+    }
   };
+
+  function renderMobileList(content, currentUser) {
+    cleanupScanner();
+    const schedules = store.filter('schedules', s => s.userId === currentUser.id);
+    const now = new Date();
+    const activeCount = schedules.filter(s => isPickupWindowActive(s, now)).length;
+    const boardedToday = schedules.filter(s => hasBoardedToday(s.id, currentUser)).length;
+
+    content.innerHTML = `
+      <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+        <div class="m-greeting__hello">My Class Schedule</div>
+        <div class="m-greeting__date">Pickup opens ${PICKUP_WINDOW_MIN} min before class. Scan driver's QR to board.</div>
+      </div>
+
+      ${activeCount > 0 ? `
+        <div class="m-hero-card" style="background: var(--brand-tint); border-color: var(--brand-primary);">
+          <div class="m-hero-card__label" style="color: var(--brand-primary-dark);">Pickup Window Open</div>
+          <div class="m-hero-card__value" style="color: var(--brand-primary-dark);">${activeCount}</div>
+          <div class="m-hero-card__summary" style="color: var(--brand-primary-dark);">
+            <span><i class="fa-solid fa-bolt"></i>&nbsp;Tap Scan to Board below</span>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="m-stats-row">
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Total Classes</div>
+          <div class="m-stat-card__value">${schedules.length}</div>
+          <div class="m-stat-card__delta">scheduled</div>
+        </div>
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Boarded Today</div>
+          <div class="m-stat-card__value">${boardedToday}</div>
+          <div class="m-stat-card__delta">${boardedToday > 0 ? 'on board' : 'not yet'}</div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" data-add-class style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Add Class
+      </button>
+
+      <div class="m-section-label">My Classes <span class="m-carousel-hint">${schedules.length}</span></div>
+      <div class="m-list-card">
+        ${schedules.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No classes yet — tap Add Class</div>'
+          : schedules.map(s => {
+            const active = isPickupWindowActive(s, now);
+            const boarded = hasBoardedToday(s.id, currentUser);
+            return `
+              <div class="m-list-card__row">
+                <i class="fa-solid fa-clock activity-feed__icon activity-feed__icon--${active ? 'pickup' : boarded ? 'payment' : 'maintenance'}" aria-hidden="true"></i>
+                <div class="m-list-card__main">
+                  <span class="m-list-card__title">${ui.escapeHtml(s.day)} &middot; ${ui.escapeHtml(s.startTime)}</span>
+                  <span class="m-list-card__meta">${ui.escapeHtml(classLabel(s.classId))}</span>
+                  <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.8;"><i class="fa-solid fa-location-dot"></i>&nbsp;${ui.escapeHtml(s.pickupLocation)}</span>
+                  <div style="margin-top: 8px; display: flex; gap: 6px;">
+                    ${boarded ? '<button class="btn btn-ghost btn-sm" disabled><i class="fa-solid fa-check"></i>&nbsp;Boarded</button>'
+                      : active ? '<button class="btn btn-primary btn-sm" data-scan="' + ui.escapeHtml(s.id) + '"><i class="fa-solid fa-qrcode"></i>&nbsp;Scan to Board</button>'
+                      : '<button class="btn btn-ghost btn-sm" disabled><i class="fa-solid fa-qrcode"></i>&nbsp;Wait for window</button>'}
+                    <button class="btn btn-ghost btn-sm" data-delete="${ui.escapeHtml(s.id)}"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                </div>
+                ${boarded ? '<span class="badge badge--success" style="font-size: 10px; flex-shrink: 0;">BOARDED</span>'
+                  : active ? '<span class="badge badge--warning" style="font-size: 10px; flex-shrink: 0;">NOW</span>'
+                  : ''}
+              </div>
+            `;
+          }).join('')}
+      </div>
+    `;
+
+    content.querySelector('[data-add-class]')?.addEventListener('click', () => openAddModal(content, currentUser));
+    content.querySelectorAll('[data-scan]').forEach(b => {
+      b.addEventListener('click', () => renderScanner(content, currentUser, b.dataset.scan));
+    });
+    content.querySelectorAll('[data-delete]').forEach(b => {
+      b.addEventListener('click', async () => {
+        const ok = await ui.confirmDialog({ title: 'Remove class', message: 'Remove this class from your schedule?', danger: true, confirmText: 'Remove' });
+        if (!ok) return;
+        store.remove('schedules', b.dataset.delete);
+        renderMobileList(content, currentUser);
+      });
+    });
+  }
 
   function renderList(content, currentUser) {
     cleanupScanner();

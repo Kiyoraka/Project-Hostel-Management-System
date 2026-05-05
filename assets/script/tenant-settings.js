@@ -5,29 +5,51 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   let state = { tab: 'profile' };
+
+  const TAB_LABELS = { profile: 'Profile', password: 'Password', payment: 'Payment Methods' };
 
   window.tenantSettingsInit = function ({ content, currentUser }) {
     render(content, currentUser);
   };
 
   function render(content, currentUser) {
-    content.innerHTML = `
-      <div class="section-header">
-        <div>
-          <div class="section-title">Settings</div>
-          <div class="section-subtitle">Manage your profile, password, and saved payment methods</div>
+    if (isMobile()) {
+      content.innerHTML = `
+        <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+          <div class="m-greeting__hello">Settings</div>
+          <div class="m-greeting__date">Profile, password, payment methods</div>
         </div>
-      </div>
 
-      <div class="tab-bar">
-        ${[['profile', 'Profile'], ['password', 'Password'], ['payment', 'Payment Methods']].map(([k, l]) => `
-          <button class="tab-bar__item ${state.tab === k ? 'is-active' : ''}" data-tab="${k}">${l}</button>
-        `).join('')}
-      </div>
+        <div class="tabs" role="tablist">
+          ${Object.entries(TAB_LABELS).map(([k, label]) => `
+            <button type="button" class="tabs__btn ${state.tab === k ? 'is-active' : ''}" data-tab="${k}">${label}</button>
+          `).join('')}
+        </div>
 
-      <div class="card card-pad" id="settings-pane"></div>
-    `;
+        <div class="m-section-label">${TAB_LABELS[state.tab]}</div>
+        <div class="card card-pad" id="settings-pane"></div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div class="section-header">
+          <div>
+            <div class="section-title">Settings</div>
+            <div class="section-subtitle">Manage your profile, password, and saved payment methods</div>
+          </div>
+        </div>
+
+        <div class="tab-bar">
+          ${[['profile', 'Profile'], ['password', 'Password'], ['payment', 'Payment Methods']].map(([k, l]) => `
+            <button class="tab-bar__item ${state.tab === k ? 'is-active' : ''}" data-tab="${k}">${l}</button>
+          `).join('')}
+        </div>
+
+        <div class="card card-pad" id="settings-pane"></div>
+      `;
+    }
 
     content.querySelectorAll('[data-tab]').forEach(b => {
       b.addEventListener('click', () => { state.tab = b.dataset.tab; render(content, currentUser); });
@@ -39,7 +61,7 @@
   function paint(pane, currentUser) {
     if (state.tab === 'profile') {
       pane.innerHTML = `
-        <form class="form" style="max-width: 540px;">
+        <form class="form" >
           <div class="grid grid-cols-2 gap-3">
             <div class="field"><label class="field-label">Full name</label><input class="input" name="name" value="${ui.escapeHtml(currentUser.name)}"></div>
             <div class="field"><label class="field-label">Email</label><input class="input" name="email" type="email" value="${ui.escapeHtml(currentUser.email)}" readonly></div>
@@ -54,7 +76,7 @@
     }
     if (state.tab === 'password') {
       pane.innerHTML = `
-        <form class="form" style="max-width: 460px;">
+        <form class="form" >
           <div class="field"><label class="field-label">Current password</label><input class="input" id="pw-current" type="password"></div>
           <div class="field"><label class="field-label">New password</label><input class="input" id="pw-new" type="password" minlength="6"></div>
           <div class="field"><label class="field-label">Confirm new password</label><input class="input" id="pw-confirm" type="password" minlength="6"></div>

@@ -5,9 +5,98 @@
 (function () {
   'use strict';
 
+  function isMobile() { return window.innerWidth <= 900; }
+
   window.tenantPaymentsInit = function ({ content, currentUser }) {
-    render(content, currentUser);
+    if (isMobile()) {
+      renderMobile(content, currentUser);
+    } else {
+      render(content, currentUser);
+    }
   };
+
+  function renderMobile(content, currentUser) {
+    const myPayments = [...store.filter('payments', p => p.userId === currentUser.id)]
+      .sort((a, b) => b.period.localeCompare(a.period));
+    const currentMonth = monthKey(0);
+    const nextMonth = monthKey(1);
+    const room = store.findById('rooms', currentUser.roomId);
+    const monthly = room?.rate || 700;
+
+    const current = myPayments.find(p => p.period === currentMonth) || { period: currentMonth, amount: monthly, status: 'due', paidOn: null };
+    const next = myPayments.find(p => p.period === nextMonth) || { period: nextMonth, amount: monthly, status: 'due', paidOn: null };
+
+    const totalPaid = myPayments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
+    const onTimeCount = myPayments.filter(p => p.status === 'paid').length;
+
+    content.innerHTML = `
+      <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+        <div class="m-greeting__hello">Rental Payments</div>
+        <div class="m-greeting__date">Room ${ui.escapeHtml(currentUser.roomId)} &middot; ${ui.formatMoney(monthly)}/mo</div>
+      </div>
+
+      <div class="m-hero-card">
+        <div class="m-hero-card__label">${ui.formatPeriod(currentMonth)} Rent</div>
+        <div class="m-hero-card__value">${ui.formatMoney(current.amount)}</div>
+        <div class="m-hero-card__summary" style="margin-bottom: var(--space-3);">
+          ${current.status === 'paid'
+            ? '<span><i class="fa-solid fa-circle-check" style="color: var(--success);"></i>&nbsp;Paid on ' + ui.formatDate(current.paidOn) + '</span>'
+            : '<span><i class="fa-solid fa-clock" style="color: var(--warning);"></i>&nbsp;Outstanding</span>'}
+        </div>
+        ${current.status === 'paid'
+          ? '<button class="btn btn-ghost" type="button" data-receipt="' + ui.escapeHtml(current.id || '') + '" style="width: 100%; padding: 10px;"><i class="fa-solid fa-download"></i>&nbsp;Download Receipt</button>'
+          : '<button class="btn btn-primary" type="button" data-pay="' + ui.escapeHtml(currentMonth) + '" style="width: 100%; padding: 12px;"><i class="fa-solid fa-credit-card"></i>&nbsp;Pay Now</button>'}
+      </div>
+
+      <div class="m-stats-row">
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Next Month</div>
+          <div class="m-stat-card__value" style="font-size: 16px;">${ui.formatMoney(next.amount)}</div>
+          <div class="m-stat-card__delta">Due ${ui.formatDate(nextMonthStart())}</div>
+        </div>
+        <div class="m-stat-card">
+          <div class="m-stat-card__label">Total Paid</div>
+          <div class="m-stat-card__value" style="font-size: 16px;">${ui.formatMoney(totalPaid)}</div>
+          <div class="m-stat-card__delta">${onTimeCount} payment${onTimeCount === 1 ? '' : 's'}</div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" type="button" data-pay="${ui.escapeHtml(nextMonth)}" style="width: 100%; padding: 10px; margin-bottom: var(--space-4);">
+        <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>&nbsp;Pay Next Month Early
+      </button>
+
+      <div class="m-section-label">Payment History <span class="m-carousel-hint">${myPayments.length}</span></div>
+      <div class="m-list-card">
+        ${myPayments.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No payment history yet</div>'
+          : myPayments.map(p => `
+            <div class="m-list-card__row">
+              <i class="fa-solid fa-money-bill-wave activity-feed__icon activity-feed__icon--${p.status === 'paid' ? 'payment' : p.status === 'late' ? 'maintenance' : 'pickup'}" aria-hidden="true"></i>
+              <div class="m-list-card__main">
+                <span class="m-list-card__title">${ui.formatPeriod(p.period)} &middot; ${ui.formatMoney(p.amount)}</span>
+                <span class="m-list-card__meta">${ui.escapeHtml(p.method || 'No method')} &middot; ${p.paidOn ? ui.formatDate(p.paidOn) : 'Not paid'}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                <span class="badge badge--${p.status === 'paid' ? 'success' : p.status === 'late' ? 'danger' : 'warning'}" style="font-size: 10px;">${ui.escapeHtml((p.status || '').toUpperCase())}</span>
+                ${p.status === 'paid' ? '<button class="btn btn-ghost btn-sm" type="button" data-receipt="' + ui.escapeHtml(p.id) + '" aria-label="Receipt"><i class="fa-solid fa-download"></i></button>' : ''}
+              </div>
+            </div>
+          `).join('')}
+      </div>
+    `;
+
+    wirePaymentActions(content, currentUser);
+  }
+
+  function wirePaymentActions(content, currentUser) {
+    content.querySelectorAll('[data-pay]').forEach(b => {
+      b.addEventListener('click', () => openPayModal(content, currentUser, b.dataset.pay));
+    });
+    content.querySelectorAll('[data-receipt]').forEach(b => {
+      b.addEventListener('click', () => {
+        ui.toast('Receipt downloaded (demo).', 'success');
+      });
+    });
+  }
 
   function render(content, currentUser) {
     const myPayments = [...store.filter('payments', p => p.userId === currentUser.id)]
