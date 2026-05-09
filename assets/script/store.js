@@ -77,6 +77,7 @@
     const prefix = {
       rooms:        'R-',
       schedules:    'SCH-',
+      enrollments:  'EN-',
       maintenance:  'M',
       payments:     'P',
       pickups:      'PK-',

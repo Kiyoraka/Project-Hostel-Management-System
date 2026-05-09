@@ -79,12 +79,12 @@
 
   function seedClasses() {
     store.writeAll('classes', [
-      { id: 'CLS-MATH101', name: 'Math 101',         code: 'MTH101' },
-      { id: 'CLS-SE',      name: 'Software Engineering', code: 'CSE301' },
-      { id: 'CLS-DB',      name: 'Database Systems', code: 'CSE302' },
-      { id: 'CLS-SELAB',   name: 'Software Eng Lab', code: 'CSE301L' },
-      { id: 'CLS-NETSEC',  name: 'Network Security', code: 'CSE401' },
-      { id: 'CLS-PHY',     name: 'Physics',          code: 'PHY101' }
+      { id: 'CLS-MATH101', name: 'Math 101',             code: 'MTH101',  day: 'Mon', startTime: '09:00' },
+      { id: 'CLS-SE',      name: 'Software Engineering', code: 'CSE301',  day: 'Tue', startTime: '14:30' },
+      { id: 'CLS-PHY',     name: 'Physics',              code: 'PHY101',  day: 'Tue', startTime: '11:00' },
+      { id: 'CLS-DB',      name: 'Database Systems',     code: 'CSE302',  day: 'Wed', startTime: '11:00' },
+      { id: 'CLS-SELAB',   name: 'Software Eng Lab',     code: 'CSE301L', day: 'Thu', startTime: '14:30' },
+      { id: 'CLS-NETSEC',  name: 'Network Security',     code: 'CSE401',  day: 'Fri', startTime: '16:00' }
     ]);
   }
 
