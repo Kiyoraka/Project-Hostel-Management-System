@@ -90,7 +90,7 @@ The admin dashboard is structured around the client's PDMS Hostel Management mod
 - **Maintenance** *(tabbed)* — Overview (existing reports + drawer) / Complaints (facility complaints) / Work Order (vendor tasks) / Records (resolved archive)
 - **Transportation** *(tabbed)* — Overview (KPI strip) / Trip Schedule (table) / Trip Status (live reports)
 - **Billings & Payment** *(tabbed)* — Overview (KPI strip) / Invoices (existing rentals) / Overdue (filtered view) / Compounds (fines) / Statistics (revenue chart)
-- **Staff & Users** *(tabbed)* — Staff List (admins + drivers) / Activity Logs (audit feed) / University Partners (MOU cards)
+- **Staff & Users** *(tabbed)* — Staff List (admins + drivers) / Activity Logs (audit feed)
 - **Profile** — single-view account card with Activity + Preferences cards
 - **Settings** — Profile / Password / Payment Settings / Hostel Info tabs (existing)
 
@@ -110,11 +110,11 @@ When the admin dashboard opens at narrow widths (phone, tablet portrait, or DevT
   - **Maintenance (Operations)** — Overview shows hero (Pending count) + 2-col stats + Maintenance Reports list-card built directly from store; Complaints shows facility complaints list-card with status badges; Work Order shows full-width [+ New] CTA + active work orders list-card with priority badges; Records shows resolved archive list-card with check icons.
   - **Transportation (Operations)** — Overview shows greeting + 2x2 stat grid (Trips Today/Completed/Pending/Drivers) + Today's Activity list-card; Trip Schedule shows trips-this-week list-card with clock icons + ACTIVE badges; Trip Status shows full-width Refresh CTA + live trip reports list-card with status badges color-coded by completion state.
   - **Billings & Payment (Operations)** — Overview shows greeting + hero (Total Billed RM with collection-rate bar) + 2-col stats (Collection % / Outstanding) + Recent Payments list-card; Invoices shows full payment list-card built directly from store with status badges; Overdue shows overdue-only filtered list-card with inline Send Reminder buttons; Compounds shows full-width [+ Issue] CTA + fines list-card; Statistics shows mobile bar chart (canvas#billing-stats-chart-mobile) + Coming Next stub.
-  - **Staff & Users (People)** — Staff List shows greeting + 2-col stats (Admins/Drivers) + [+ Add Staff] CTA + staff list-card with avatar circles + role badges; Activity Logs shows audit list-card with monospace IPs; University Partners shows shortName-chip list-card with MOU dates.
+  - **Staff & Users (People)** — Staff List shows greeting + 2-col stats (Admins/Drivers) + [+ Add Staff] CTA + staff list-card with avatar circles + role badges; Activity Logs shows audit list-card with monospace IPs.
   - **Profile (Account)** — Centered hero profile card (avatar + name + role + email + Edit btn) + Account Info list-card (name/email/phone/role/member-since) + Activity list-card (last login / count / action / IP / session) + Preferences list-card with 4 interactive rows (email notifications / SMS / theme select / language select).
   - **Settings (Account)** — Greeting + scroll-snap tab bar + active tab name as section label + full-width stacked form (max-width constraint removed) for the 4 tabs (Profile / Password / Payment Settings / Hostel Info). Form fields collapse to 1-col + Save buttons full-width on mobile.
 
-**All 9 admin routes (24 tabs total) now have dedicated mobile-native renders.** No remaining CSS-shrunk-desktop pages.
+**All 9 admin routes (23 tabs total) now have dedicated mobile-native renders.** No remaining CSS-shrunk-desktop pages.
 - **Content adaptations on other pages** — section tabs become horizontal scroll-snap; wide tables scroll horizontally inside their wrappers; two-column layouts collapse to single column.
 - **Auto-swap on resize** — if the browser is resized across the 900px boundary, the active section re-renders (debounced 150ms) so layout changes instantly without manual reload.
 - **Safe area** — `env(safe-area-inset-bottom)` honored so the bottom nav clears the iPhone home indicator.
@@ -243,11 +243,10 @@ This is a hardcoded prototype demonstrating the PDMS Hostel Management module st
 | Billings & Payment | Statistics | Demo |
 | Staff & Users | Staff List | Live |
 | Staff & Users | Activity Logs | Demo |
-| Staff & Users | University Partners | Demo |
 | Profile | Account info / Activity / Preferences | Live (uses current session) |
 | Settings | Profile / Password / Payment Settings / Hostel Info | Live |
 
-Demo seed data uses Malaysian-context names and addresses (Asrama Mahkota, +60 phone format, UTM/USM/UM partners, Block A/B/C wardens) so the prototype reads as regional rather than generic.
+Demo seed data uses Malaysian-context names and addresses (Asrama Mahkota, +60 phone format, Block A/B/C wardens) so the prototype reads as regional rather than generic.
 
 ## Browser Support
 

@@ -37,7 +37,6 @@
     seedHostels();
     seedAnnouncements();
     seedAttendance();
-    seedPartners();
     seedCompounds();
   }
 
@@ -284,15 +283,6 @@
       { id: 'AT-004', userId: 'U005', studentName: 'Lee Wei',      studentId: 'STU-2026-0014', event: 'in',  location: 'Block C Lobby', recordedAt: hoursAgo(3),  method: 'manual' },
       { id: 'AT-005', userId: 'U006', studentName: 'Raj Kumar',    studentId: 'STU-2026-0019', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(5),  method: 'manual' },
       { id: 'AT-006', userId: 'U007', studentName: 'Nur Hidayah',  studentId: 'STU-2026-0023', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(10), method: 'manual' }
-    ]);
-  }
-
-  function seedPartners() {
-    if (store.readAll('partners').length > 0) return;
-    store.writeAll('partners', [
-      { id: 'UP-001', name: 'Universiti Teknologi Malaysia (UTM)', shortName: 'UTM', mouSigned: '2024-09-15', studentCount: 38, contactPerson: 'Dr Faridah Ali',     contactEmail: 'liaison@utm.my' },
-      { id: 'UP-002', name: 'Universiti Sains Malaysia (USM)',     shortName: 'USM', mouSigned: '2025-01-20', studentCount: 14, contactPerson: 'Prof Goh Wei',       contactEmail: 'student.aff@usm.my' },
-      { id: 'UP-003', name: 'Universiti Malaya (UM)',              shortName: 'UM',  mouSigned: '2025-06-10', studentCount: 9,  contactPerson: 'Dr Aminah Ibrahim',  contactEmail: 'partnership@um.edu.my' }
     ]);
   }
 

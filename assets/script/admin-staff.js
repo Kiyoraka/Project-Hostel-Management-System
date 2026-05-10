@@ -1,6 +1,6 @@
 /* =====================================================================
    admin-staff.js — Staff & Users tabbed wrapper (Phase 11)
-   Tabs: Staff List | Activity Logs | University Partners
+   Tabs: Staff List | Activity Logs
    ===================================================================== */
 
 (function () {
@@ -9,9 +9,8 @@
   function isMobile() { return window.innerWidth <= 900; }
 
   const TABS = [
-    { id: 'staff',    label: 'Staff List',          icon: 'fa-user-tie' },
-    { id: 'logs',     label: 'Activity Logs',       icon: 'fa-list-check' },
-    { id: 'partners', label: 'University Partners', icon: 'fa-graduation-cap' }
+    { id: 'staff', label: 'Staff List',    icon: 'fa-user-tie' },
+    { id: 'logs',  label: 'Activity Logs', icon: 'fa-list-check' }
   ];
 
   function init({ content, currentUser }) {
@@ -22,7 +21,7 @@
         <div class="section-header">
           <div>
             <div class="section-title">Staff &amp; Users</div>
-            <div class="section-subtitle">Internal staff, audit logs, and university partnerships</div>
+            <div class="section-subtitle">Internal staff and audit logs</div>
           </div>
         </div>
 
@@ -45,9 +44,8 @@
     function renderPanel() {
       const panel = content.querySelector('#staff-tab-panel');
       if (!panel) return;
-      if (activeTab === 'staff')    return renderStaff(panel);
-      if (activeTab === 'logs')     return renderLogs(panel);
-      if (activeTab === 'partners') return renderPartners(panel);
+      if (activeTab === 'staff') return renderStaff(panel);
+      if (activeTab === 'logs')  return renderLogs(panel);
     }
 
     function renderStaff(panel) {
@@ -203,85 +201,6 @@
                 <span class="m-list-card__meta" style="font-family: var(--font-mono); font-size: 11px; opacity: 0.7;">${ui.escapeHtml(l.ip)}</span>
               </div>
               <span class="m-list-card__time">${ui.escapeHtml(l.at)}</span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function renderPartners(panel) {
-      if (isMobile()) return renderMobilePartners(panel);
-      const partners = store.readAll('partners') || [];
-      panel.innerHTML = `
-        <div class="card card-pad stub-section">
-          <div class="stub-section__banner">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; university partner directory. MOU document upload + auto-renewal alerts ship in Phase 2.</span>
-          </div>
-          <div class="stub-section__layout">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
-                <h4 style="margin: 0;">University Partners</h4>
-                <button class="btn btn-primary btn-sm" type="button"><i class="fa-solid fa-plus"></i>&nbsp;Add Partner</button>
-              </div>
-              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4);">
-                ${partners.map(p => `
-                  <div class="card card-pad" style="background: var(--surface-soft);">
-                    <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
-                      <div style="width: 56px; height: 56px; border-radius: var(--radius-input); background: var(--brand-tint); color: var(--brand-primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">${ui.escapeHtml(p.shortName)}</div>
-                      <div>
-                        <div style="font-weight: 600; color: var(--ink-900); font-size: 14px;">${ui.escapeHtml(p.name)}</div>
-                        <div style="font-size: 12px; color: var(--ink-500);">${p.studentCount} students</div>
-                      </div>
-                    </div>
-                    <div style="font-size: 13px; color: var(--ink-700); line-height: 1.7;">
-                      <div><strong>MOU:</strong> ${ui.escapeHtml(p.mouSigned)}</div>
-                      <div><strong>Liaison:</strong> ${ui.escapeHtml(p.contactPerson)}</div>
-                      <div><strong>Email:</strong> ${ui.escapeHtml(p.contactEmail)}</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            <aside class="stub-section__aside">
-              <h4>Coming next</h4>
-              <ul>
-                <li>MOU document upload</li>
-                <li>Auto-renewal alerts</li>
-                <li>Per-uni reporting</li>
-                <li>Bulk student import</li>
-              </ul>
-            </aside>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderMobilePartners(panel) {
-      const partners = store.readAll('partners') || [];
-
-      panel.innerHTML = `
-        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
-          <div class="stub-section__banner" style="margin-bottom: 0;">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; MOU upload ships in Phase 2.</span>
-          </div>
-        </div>
-
-        <button class="btn btn-primary" type="button" style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
-          <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Add Partner
-        </button>
-
-        <div class="m-section-label">University Partners <span class="m-carousel-hint">${partners.length}</span></div>
-        <div class="m-list-card">
-          ${partners.map(p => `
-            <div class="m-list-card__row" style="align-items: center;">
-              <span style="width: 48px; height: 48px; border-radius: var(--radius-input); background: var(--brand-tint); color: var(--brand-primary-dark); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0;">${ui.escapeHtml(p.shortName)}</span>
-              <div class="m-list-card__main">
-                <span class="m-list-card__title">${ui.escapeHtml(p.name)}</span>
-                <span class="m-list-card__meta">${p.studentCount} students &middot; MOU ${ui.escapeHtml(p.mouSigned)}</span>
-                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(p.contactPerson)} &middot; ${ui.escapeHtml(p.contactEmail)}</span>
-              </div>
             </div>
           `).join('')}
         </div>

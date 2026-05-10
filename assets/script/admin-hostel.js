@@ -402,7 +402,7 @@
       const appts = [
         { time: '14:00', visitor: 'Encik Ali (Father)', resident: 'Ahmad Faiz',  purpose: 'Family visit' },
         { time: '15:30', visitor: 'Pos Laju Courier',   resident: 'Siti Aminah', purpose: 'Parcel delivery' },
-        { time: '16:00', visitor: 'UTM Liaison Officer',resident: 'All Block A', purpose: 'Welfare check' }
+        { time: '16:00', visitor: 'External Welfare Officer', resident: 'All Block A', purpose: 'Welfare check' }
       ];
       panel.innerHTML = `
         <div class="card card-pad stub-section">
@@ -446,7 +446,7 @@
       const appts = [
         { time: '14:00', icon: 'fa-user', visitor: 'Encik Ali (Father)', resident: 'Ahmad Faiz',  purpose: 'Family visit',     status: 'Confirmed' },
         { time: '15:30', icon: 'fa-box',  visitor: 'Pos Laju Courier',   resident: 'Siti Aminah', purpose: 'Parcel delivery',  status: 'Confirmed' },
-        { time: '16:00', icon: 'fa-graduation-cap', visitor: 'UTM Liaison Officer', resident: 'All Block A', purpose: 'Welfare check', status: 'Confirmed' }
+        { time: '16:00', icon: 'fa-user-shield', visitor: 'External Welfare Officer', resident: 'All Block A', purpose: 'Welfare check', status: 'Confirmed' }
       ];
 
       panel.innerHTML = `
