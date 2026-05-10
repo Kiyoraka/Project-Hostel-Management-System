@@ -9,10 +9,10 @@
 
   window.tenantHomeInit = function ({ content, currentUser }) {
     const room = store.findById('rooms', currentUser.roomId);
-    const schedules = store.filter('schedules', s => s.userId === currentUser.id);
-    const nextSchedule = pickNextSchedule(schedules);
-    const nextNice = nextSchedule
-      ? `${nextSchedule.day} ${nextSchedule.startTime} · ${classLabel(nextSchedule.classId)}`
+    const enrollments = store.filter('enrollments', e => e.userId === currentUser.id);
+    const next = pickNextPickup(enrollments);
+    const nextNice = next
+      ? `${next.cls.day} ${next.cls.startTime} · ${next.cls.name}`
       : 'No upcoming pickup';
 
     const payments = store.filter('payments', p => p.userId === currentUser.id);
@@ -36,7 +36,7 @@
           <div class="m-hero-card__label">Next Class Pickup</div>
           <div class="m-hero-card__value" style="font-size: 22px;">${ui.escapeHtml(nextNice)}</div>
           <div class="m-hero-card__summary" style="margin-top: var(--space-3);">
-            <span><i class="fa-solid fa-location-dot" style="color: var(--brand-primary);"></i>&nbsp;${nextSchedule ? ui.escapeHtml(nextSchedule.pickupLocation) : 'No pickup yet'}</span>
+            <span><i class="fa-solid fa-location-dot" style="color: var(--brand-primary);"></i>&nbsp;${next ? ui.escapeHtml(next.enrollment.pickupLocation) : 'No pickup yet'}</span>
           </div>
           <a href="#/schedule" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: var(--space-4); display: inline-flex; align-items: center; justify-content: center;">
             <i class="fa-solid fa-qrcode" aria-hidden="true"></i>&nbsp;Scan to Board
@@ -70,7 +70,7 @@
             <i class="fa-solid fa-calendar-days activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
             <div class="m-list-card__main">
               <span class="m-list-card__title">Class Schedule</span>
-              <span class="m-list-card__meta">${schedules.length} classes &middot; ${nextNice}</span>
+              <span class="m-list-card__meta">${enrollments.length} classes &middot; ${nextNice}</span>
             </div>
             <i class="fa-solid fa-chevron-right" style="color: var(--ink-500); flex-shrink: 0;" aria-hidden="true"></i>
           </a>
@@ -120,7 +120,7 @@
             <div class="dashboard-card__icon"><i class="fa-solid fa-van-shuttle"></i></div>
           </div>
           <div class="dashboard-card__value">${ui.escapeHtml(nextNice)}</div>
-          <div class="dashboard-card__sub">${nextSchedule ? 'Pickup: ' + ui.escapeHtml(nextSchedule.pickupLocation) : 'Add a class to your schedule first'}</div>
+          <div class="dashboard-card__sub">${next ? 'Pickup: ' + ui.escapeHtml(next.enrollment.pickupLocation) : 'Add a class to your schedule first'}</div>
           <div class="dashboard-card__cta">
             <a href="#/schedule" class="btn btn-primary btn-sm">Scan to board <i class="fa-solid fa-qrcode"></i></a>
           </div>
@@ -157,25 +157,24 @@
     return new Date().toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  function classLabel(id) {
-    const c = store.findById('classes', id);
-    return c ? c.name : id;
-  }
-
-  function pickNextSchedule(schedules) {
-    if (!schedules.length) return null;
+  function pickNextPickup(enrollments) {
+    if (!enrollments.length) return null;
+    const enriched = enrollments
+      .map(e => ({ enrollment: e, cls: store.findById('classes', e.classId) }))
+      .filter(x => x.cls);
+    if (!enriched.length) return null;
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
     const todayDay = days[today.getDay()];
     const todayMin = today.getHours() * 60 + today.getMinutes();
-    const sortedToday = schedules.filter(s => s.day === todayDay && timeToMin(s.startTime) >= todayMin);
-    if (sortedToday.length) return sortedToday.sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime))[0];
+    const sortedToday = enriched.filter(x => x.cls.day === todayDay && timeToMin(x.cls.startTime) >= todayMin);
+    if (sortedToday.length) return sortedToday.sort((a, b) => timeToMin(a.cls.startTime) - timeToMin(b.cls.startTime))[0];
     for (let off = 1; off <= 6; off++) {
       const d = days[(today.getDay() + off) % 7];
-      const found = schedules.find(s => s.day === d);
+      const found = enriched.find(x => x.cls.day === d);
       if (found) return found;
     }
-    return schedules[0];
+    return enriched[0];
   }
 
   function timeToMin(hhmm) {

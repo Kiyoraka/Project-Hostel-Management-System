@@ -263,6 +263,8 @@ location.reload();
 
 Then refresh — `seed.js` will re-seed from scratch.
 
+If you have an older session loaded (pre-Round 6), `seed.js` automatically applies the V2 migration on next page load — it drops the legacy `hms_schedules` collection, re-seeds `classes` (with day/time fields) + `enrollments` + `pickups`, and sets `hms__seeded_v2` to mark the migration boundary. No manual reset needed for existing demo accounts.
+
 ## License
 
 Built for demo purposes. Contact the project owner for usage rights.
