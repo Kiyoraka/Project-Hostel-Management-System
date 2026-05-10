@@ -14,9 +14,10 @@
   const DAY_ORDER = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
 
   const TABS = [
-    { id: 'overview', label: 'Overview',       icon: 'fa-gauge' },
-    { id: 'schedule', label: 'Trip Schedule',  icon: 'fa-calendar-days' },
-    { id: 'status',   label: 'Trip Status',    icon: 'fa-tower-broadcast' }
+    { id: 'overview',    label: 'Overview',       icon: 'fa-gauge' },
+    { id: 'schedule',    label: 'Trip Schedule',  icon: 'fa-calendar-days' },
+    { id: 'status',      label: 'Trip Status',    icon: 'fa-tower-broadcast' },
+    { id: 'enrollments', label: 'Enrollments',    icon: 'fa-user-plus' }
   ];
 
   function init({ content, currentUser }) {
@@ -50,9 +51,224 @@
     function renderPanel() {
       const panel = content.querySelector('#trans-tab-panel');
       if (!panel) return;
-      if (activeTab === 'overview') return renderOverview(panel);
-      if (activeTab === 'schedule') return renderSchedule(panel);
-      if (activeTab === 'status')   return renderStatus(panel);
+      if (activeTab === 'overview')    return renderOverview(panel);
+      if (activeTab === 'schedule')    return renderSchedule(panel);
+      if (activeTab === 'status')      return renderStatus(panel);
+      if (activeTab === 'enrollments') return renderEnrollments(panel);
+    }
+
+    function allTenants() {
+      const primary = (auth.listUsers() || []).filter(u => u.role === 'tenant');
+      const extras = store.readAll('extra_tenants') || [];
+      const seen = new Set(primary.map(u => u.id));
+      return [
+        ...primary,
+        ...extras.filter(e => !seen.has(e.id))
+      ].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+
+    function tenantNameById(userId) {
+      const t = allTenants().find(u => u.id === userId);
+      return t ? t.name : userId;
+    }
+
+    function renderEnrollments(panel) {
+      if (isMobile()) return renderMobileEnrollments(panel);
+      const enrollments = store.readAll('enrollments') || [];
+      const sorted = [...enrollments].sort((a, b) => {
+        const nameA = tenantNameById(a.userId);
+        const nameB = tenantNameById(b.userId);
+        const nameDiff = nameA.localeCompare(nameB);
+        if (nameDiff !== 0) return nameDiff;
+        const clsA = store.findById('classes', a.classId);
+        const clsB = store.findById('classes', b.classId);
+        if (!clsA || !clsB) return 0;
+        const dayDiff = (DAY_ORDER[clsA.day] || 9) - (DAY_ORDER[clsB.day] || 9);
+        if (dayDiff !== 0) return dayDiff;
+        return timeToMin(clsA.startTime) - timeToMin(clsB.startTime);
+      });
+
+      panel.innerHTML = `
+        <div class="card card-pad">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+            <div>
+              <h3 style="margin: 0;">Manage Class Enrollments</h3>
+              <p class="text-mute" style="margin: 4px 0 0; font-size: 13px;">Assign students to classes. Students see their schedule read-only and can only Scan to Board.</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-add-enrollment>
+              <i class="fa-solid fa-plus"></i>&nbsp;Add Enrollment
+            </button>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Class</th>
+                <th>Day / Time</th>
+                <th>Pickup</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sorted.length === 0
+                ? '<tr><td colspan="6" style="text-align:center; padding: 32px; color: var(--ink-500);">No enrollments yet — click Add Enrollment</td></tr>'
+                : sorted.map(e => {
+                  const cls = store.findById('classes', e.classId);
+                  const dayTime = cls ? cls.day + ' · ' + cls.startTime : '—';
+                  return `
+                    <tr>
+                      <td><strong>${ui.escapeHtml(tenantNameById(e.userId))}</strong><br><span class="text-mute" style="font-size: 12px;">${ui.escapeHtml(e.studentId || '')}</span></td>
+                      <td>${ui.escapeHtml(cls ? cls.name : e.classId)}</td>
+                      <td>${ui.escapeHtml(dayTime)}</td>
+                      <td>${ui.escapeHtml(e.pickupLocation)}</td>
+                      <td><span class="badge badge-success">${ui.escapeHtml(e.status || 'active')}</span></td>
+                      <td style="text-align:right;">
+                        <button class="btn btn-ghost btn-sm" data-edit="${ui.escapeHtml(e.id)}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-ghost btn-sm" data-remove="${ui.escapeHtml(e.id)}"><i class="fa-solid fa-trash"></i></button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      wireEnrollmentActions(panel);
+    }
+
+    function renderMobileEnrollments(panel) {
+      const enrollments = store.readAll('enrollments') || [];
+      panel.innerHTML = `
+        <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
+          <div class="m-greeting__hello">Manage Enrollments</div>
+          <div class="m-greeting__date">Assign students to classes. Students view-only.</div>
+        </div>
+
+        <button type="button" class="btn btn-primary" data-add-enrollment style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
+          <i class="fa-solid fa-plus"></i>&nbsp;Add Enrollment
+        </button>
+
+        <div class="m-section-label">All Enrollments <span class="m-carousel-hint">${enrollments.length}</span></div>
+        <div class="m-list-card">
+          ${enrollments.length === 0
+            ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No enrollments yet — tap Add Enrollment</div>'
+            : enrollments.map(e => {
+              const cls = store.findById('classes', e.classId);
+              const dayTime = cls ? cls.day + ' · ' + cls.startTime : '—';
+              return `
+                <div class="m-list-card__row">
+                  <i class="fa-solid fa-user-graduate activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+                  <div class="m-list-card__main">
+                    <span class="m-list-card__title">${ui.escapeHtml(tenantNameById(e.userId))}</span>
+                    <span class="m-list-card__meta">${ui.escapeHtml(cls ? cls.name : e.classId)} &middot; ${ui.escapeHtml(dayTime)}</span>
+                    <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.8;"><i class="fa-solid fa-location-dot"></i>&nbsp;${ui.escapeHtml(e.pickupLocation)}</span>
+                    <div style="margin-top: 8px; display: flex; gap: 6px;">
+                      <button class="btn btn-ghost btn-sm" data-edit="${ui.escapeHtml(e.id)}"><i class="fa-solid fa-pen"></i>&nbsp;Edit</button>
+                      <button class="btn btn-ghost btn-sm" data-remove="${ui.escapeHtml(e.id)}"><i class="fa-solid fa-trash"></i>&nbsp;Remove</button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+        </div>
+      `;
+
+      wireEnrollmentActions(panel);
+    }
+
+    function wireEnrollmentActions(panel) {
+      panel.querySelector('[data-add-enrollment]')?.addEventListener('click', () => openEnrollmentModal(null));
+      panel.querySelectorAll('[data-edit]').forEach(b => {
+        b.addEventListener('click', () => openEnrollmentModal(b.dataset.edit));
+      });
+      panel.querySelectorAll('[data-remove]').forEach(b => {
+        b.addEventListener('click', async () => {
+          const ok = await ui.confirmDialog({ title: 'Remove enrollment', message: 'Remove this enrollment? The student will lose trip access for this class.', danger: true, confirmText: 'Remove' });
+          if (!ok) return;
+          store.remove('enrollments', b.dataset.remove);
+          ui.toast('Enrollment removed.', 'success');
+          renderPanel();
+        });
+      });
+    }
+
+    function openEnrollmentModal(editingId) {
+      const tenants = allTenants();
+      const classes = store.readAll('classes') || [];
+      const editing = editingId ? store.findById('enrollments', editingId) : null;
+      const isEdit = !!editing;
+
+      const body = document.createElement('div');
+      body.innerHTML = `
+        <form class="schedule-form">
+          <div class="field">
+            <label class="field-label" for="ef-student">Student</label>
+            <select class="select" id="ef-student" name="userId" required ${isEdit ? 'disabled' : ''}>
+              ${tenants.map(t => `<option value="${ui.escapeHtml(t.id)}" data-student-id="${ui.escapeHtml(t.studentId || '')}" ${editing && editing.userId === t.id ? 'selected' : ''}>${ui.escapeHtml(t.name)} (${ui.escapeHtml(t.studentId || t.id)})</option>`).join('')}
+            </select>
+            ${isEdit ? '<div class="field-help" style="font-size: 12px; color: var(--ink-500); margin-top: 4px;">Student locked when editing. Remove + re-create to reassign.</div>' : ''}
+          </div>
+          <div class="field">
+            <label class="field-label" for="ef-class">Class</label>
+            <select class="select" id="ef-class" name="classId" required ${isEdit ? 'disabled' : ''}>
+              ${classes.map(c => `<option value="${ui.escapeHtml(c.id)}" ${editing && editing.classId === c.id ? 'selected' : ''}>${ui.escapeHtml(c.name)} (${ui.escapeHtml(c.code)}) — ${ui.escapeHtml(c.day)} ${ui.escapeHtml(c.startTime)}</option>`).join('')}
+            </select>
+            ${isEdit ? '<div class="field-help" style="font-size: 12px; color: var(--ink-500); margin-top: 4px;">Class locked when editing. Remove + re-create to change class.</div>' : ''}
+          </div>
+          <div class="field">
+            <label class="field-label" for="ef-pickup">Pickup location</label>
+            <select class="select" id="ef-pickup" name="pickupLocation" required>
+              ${['Block A Lobby', 'Block B Lobby', 'Block C Lobby', 'Main Gate'].map(loc => `<option ${editing && editing.pickupLocation === loc ? 'selected' : ''}>${loc}</option>`).join('')}
+            </select>
+          </div>
+        </form>
+      `;
+
+      const footer = document.createElement('div');
+      footer.style.display = 'flex'; footer.style.gap = '12px';
+      const cancel = document.createElement('button');
+      cancel.className = 'btn btn-secondary';
+      cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', () => ui.closeModal());
+      const save = document.createElement('button');
+      save.className = 'btn btn-primary';
+      save.textContent = isEdit ? 'Save changes' : 'Add enrollment';
+      save.addEventListener('click', () => {
+        const form = body.querySelector('form');
+        const data = Object.fromEntries(new FormData(form).entries());
+
+        if (isEdit) {
+          store.update('enrollments', editing.id, { pickupLocation: data.pickupLocation });
+          ui.toast('Enrollment updated.', 'success');
+        } else {
+          // Add path - userId + classId from form, status default active
+          const tenant = tenants.find(t => t.id === data.userId);
+          if (!tenant) { ui.toast('Student not found.', 'danger'); return; }
+          // Duplicate guard
+          const existing = store.find('enrollments', e => e.userId === data.userId && e.classId === data.classId);
+          if (existing) { ui.toast('This student is already enrolled in that class.', 'danger'); return; }
+          const cls = store.findById('classes', data.classId);
+          const classCode = cls ? cls.id.replace(/^CLS-/, '') : 'X';
+          const newRow = {
+            id: 'EN-' + classCode + '-' + tenant.id,
+            userId: tenant.id,
+            studentId: tenant.studentId || '',
+            classId: data.classId,
+            pickupLocation: data.pickupLocation,
+            status: 'active'
+          };
+          store.insert('enrollments', newRow);
+          ui.toast('Enrollment added.', 'success');
+        }
+
+        ui.closeModal();
+        renderPanel();
+      });
+      footer.appendChild(cancel); footer.appendChild(save);
+      ui.openModal({ title: isEdit ? 'Edit enrollment' : 'Add enrollment', body, footer });
     }
 
     function tripClasses() {
