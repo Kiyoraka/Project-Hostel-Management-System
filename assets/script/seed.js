@@ -13,13 +13,24 @@
       seedRooms();
       seedExtraTenants();
       seedClasses();
-      seedSchedules();
+      seedEnrollments();
       seedPayments();
       seedMaintenance();
       seedPickups();
 
       store.markSeeded();
+      localStorage.setItem('hms__seeded_v2', '1');
       console.log('[seed] Database seeded.');
+    } else if (!localStorage.getItem('hms__seeded_v2')) {
+      // V2 migration: schedule model refactor (schedules -> enrollments)
+      // Re-seed classes (now with day+startTime) + enrollments + pickups
+      // Drop legacy hms_schedules so old rows do not leak into new render code
+      localStorage.removeItem('hms_schedules');
+      seedClasses();
+      seedEnrollments();
+      seedPickups();
+      localStorage.setItem('hms__seeded_v2', '1');
+      console.log('[seed] V2 schedule model migration applied.');
     }
 
     // PDMS module seeds — idempotent per-table, run on every load to backfill
@@ -88,13 +99,24 @@
     ]);
   }
 
-  function seedSchedules() {
-    store.writeAll('schedules', [
-      { id: 'SCH-Mon-0900', studentId: 'STU-2026-0007', userId: 'U002', day: 'Mon', startTime: '09:00', classId: 'CLS-MATH101', pickupLocation: 'Block A Lobby', status: 'active' },
-      { id: 'SCH-Tue-1430', studentId: 'STU-2026-0007', userId: 'U002', day: 'Tue', startTime: '14:30', classId: 'CLS-SE',      pickupLocation: 'Block A Lobby', status: 'active' },
-      { id: 'SCH-Wed-1100', studentId: 'STU-2026-0007', userId: 'U002', day: 'Wed', startTime: '11:00', classId: 'CLS-DB',      pickupLocation: 'Block A Lobby', status: 'active' },
-      { id: 'SCH-Thu-1430', studentId: 'STU-2026-0007', userId: 'U002', day: 'Thu', startTime: '14:30', classId: 'CLS-SELAB',   pickupLocation: 'Block A Lobby', status: 'active' },
-      { id: 'SCH-Fri-1600', studentId: 'STU-2026-0007', userId: 'U002', day: 'Fri', startTime: '16:00', classId: 'CLS-NETSEC',  pickupLocation: 'Block A Lobby', status: 'active' }
+  function seedEnrollments() {
+    store.writeAll('enrollments', [
+      // Ahmad Faiz (U002) - 5 classes Mon-Fri
+      { id: 'EN-MATH-U002',   userId: 'U002', studentId: 'STU-2026-0007', classId: 'CLS-MATH101', pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-SE-U002',     userId: 'U002', studentId: 'STU-2026-0007', classId: 'CLS-SE',      pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-DB-U002',     userId: 'U002', studentId: 'STU-2026-0007', classId: 'CLS-DB',      pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-SELAB-U002',  userId: 'U002', studentId: 'STU-2026-0007', classId: 'CLS-SELAB',   pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-NETSEC-U002', userId: 'U002', studentId: 'STU-2026-0007', classId: 'CLS-NETSEC',  pickupLocation: 'Block A Lobby', status: 'active' },
+      // Siti Aminah (U004) - MATH + DB
+      { id: 'EN-MATH-U004',   userId: 'U004', studentId: 'STU-2026-0008', classId: 'CLS-MATH101', pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-DB-U004',     userId: 'U004', studentId: 'STU-2026-0008', classId: 'CLS-DB',      pickupLocation: 'Block A Lobby', status: 'active' },
+      // Raj Kumar (U006) - MATH + SE + PHY (PHY supports PK-2 demo pickup)
+      { id: 'EN-MATH-U006',   userId: 'U006', studentId: 'STU-2026-0010', classId: 'CLS-MATH101', pickupLocation: 'Block B Lobby', status: 'active' },
+      { id: 'EN-SE-U006',     userId: 'U006', studentId: 'STU-2026-0010', classId: 'CLS-SE',      pickupLocation: 'Block B Lobby', status: 'active' },
+      { id: 'EN-PHY-U006',    userId: 'U006', studentId: 'STU-2026-0010', classId: 'CLS-PHY',     pickupLocation: 'Block B Lobby', status: 'active' },
+      // Nur Hidayah (U007) - DB + NETSEC
+      { id: 'EN-DB-U007',     userId: 'U007', studentId: 'STU-2026-0011', classId: 'CLS-DB',      pickupLocation: 'Block A Lobby', status: 'active' },
+      { id: 'EN-NETSEC-U007', userId: 'U007', studentId: 'STU-2026-0011', classId: 'CLS-NETSEC',  pickupLocation: 'Block A Lobby', status: 'active' }
     ]);
   }
 
@@ -213,8 +235,8 @@
     const today = new Date();
     const todayStr = today.toISOString().slice(0, 10);
     store.writeAll('pickups', [
-      { id: 'PK-1', driverId: 'U003', scheduleId: 'SCH-Mon-0900', date: todayStr, status: 'completed', studentCount: 3, classLabel: 'Math 101' },
-      { id: 'PK-2', driverId: 'U003', scheduleId: 'SCH-Tue-1100', date: todayStr, status: 'completed', studentCount: 2, classLabel: 'Physics' }
+      { id: 'PK-1', driverId: 'U003', enrollmentId: 'EN-MATH-U002', classId: 'CLS-MATH101', userId: 'U002', studentId: 'STU-2026-0007', date: todayStr, status: 'completed', studentCount: 3, classLabel: 'Math 101' },
+      { id: 'PK-2', driverId: 'U003', enrollmentId: 'EN-PHY-U006',  classId: 'CLS-PHY',     userId: 'U006', studentId: 'STU-2026-0010', date: todayStr, status: 'completed', studentCount: 1, classLabel: 'Physics' }
     ]);
   }
 
