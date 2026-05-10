@@ -1,6 +1,6 @@
 /* =====================================================================
    admin-staff.js — Staff & Users tabbed wrapper (Phase 11)
-   Tabs: Staff List | Roles & Permission | Activity Logs | University Partners
+   Tabs: Staff List | Activity Logs | University Partners
    ===================================================================== */
 
 (function () {
@@ -10,7 +10,6 @@
 
   const TABS = [
     { id: 'staff',    label: 'Staff List',          icon: 'fa-user-tie' },
-    { id: 'roles',    label: 'Roles & Permission',  icon: 'fa-shield-halved' },
     { id: 'logs',     label: 'Activity Logs',       icon: 'fa-list-check' },
     { id: 'partners', label: 'University Partners', icon: 'fa-graduation-cap' }
   ];
@@ -23,7 +22,7 @@
         <div class="section-header">
           <div>
             <div class="section-title">Staff &amp; Users</div>
-            <div class="section-subtitle">Internal staff, role-based permissions, audit logs, and university partnerships</div>
+            <div class="section-subtitle">Internal staff, audit logs, and university partnerships</div>
           </div>
         </div>
 
@@ -47,7 +46,6 @@
       const panel = content.querySelector('#staff-tab-panel');
       if (!panel) return;
       if (activeTab === 'staff')    return renderStaff(panel);
-      if (activeTab === 'roles')    return renderRoles(panel);
       if (activeTab === 'logs')     return renderLogs(panel);
       if (activeTab === 'partners') return renderPartners(panel);
     }
@@ -125,92 +123,6 @@
       `;
     }
 
-    function renderRoles(panel) {
-      if (isMobile()) return renderMobileRoles(panel);
-      const capabilities = ['Manage Users', 'View Payments', 'Edit Rooms', 'Scan QR', 'Issue Compounds', 'Send Announcements', 'View Reports', 'Export Data'];
-      const matrix = {
-        'Admin':   [true, true, true, false, true, true, true, true],
-        'Staff':   [false, true, true, false, true, true, true, false],
-        'Driver':  [false, false, false, true, false, false, false, false],
-        'Tenant':  [false, false, false, false, false, false, false, false]
-      };
-      panel.innerHTML = `
-        <div class="card card-pad stub-section">
-          <div class="stub-section__banner">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; role permission matrix preview. Granular RBAC + custom roles ship in Phase 2.</span>
-          </div>
-          <div class="stub-section__layout">
-            <div>
-              <h4 style="margin-top: 0;">Permission Matrix</h4>
-              <table class="table">
-                <thead><tr><th>Capability</th>${Object.keys(matrix).map(r => `<th style="text-align: center;">${r}</th>`).join('')}</tr></thead>
-                <tbody>
-                  ${capabilities.map((cap, ci) => `
-                    <tr>
-                      <td>${ui.escapeHtml(cap)}</td>
-                      ${Object.keys(matrix).map(role => `
-                        <td style="text-align: center;">
-                          <input type="checkbox" ${matrix[role][ci] ? 'checked' : ''} disabled />
-                        </td>
-                      `).join('')}
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-            <aside class="stub-section__aside">
-              <h4>Coming next</h4>
-              <ul>
-                <li>Editable matrix</li>
-                <li>Custom roles</li>
-                <li>Permission groups</li>
-                <li>Audit on changes</li>
-              </ul>
-            </aside>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderMobileRoles(panel) {
-      const capabilities = ['Manage Users', 'View Payments', 'Edit Rooms', 'Scan QR', 'Issue Compounds', 'Send Announcements', 'View Reports', 'Export Data'];
-      const matrix = {
-        'Admin':   [true, true, true, false, true, true, true, true],
-        'Staff':   [false, true, true, false, true, true, true, false],
-        'Driver':  [false, false, false, true, false, false, false, false],
-        'Tenant':  [false, false, false, false, false, false, false, false]
-      };
-      const roleColor = { 'Admin': 'success', 'Staff': 'info', 'Driver': 'warning', 'Tenant': '' };
-
-      panel.innerHTML = `
-        <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
-          <div class="stub-section__banner" style="margin-bottom: 0;">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; editable matrix ships in Phase 2.</span>
-          </div>
-        </div>
-
-        <div class="m-section-label">Permission Matrix <span class="m-carousel-hint">${capabilities.length} capabilities</span></div>
-        <div class="m-list-card">
-          ${capabilities.map((cap, ci) => {
-            const grantedRoles = Object.keys(matrix).filter(r => matrix[r][ci]);
-            return `
-              <div class="m-list-card__row">
-                <i class="fa-solid fa-shield-halved activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
-                <div class="m-list-card__main">
-                  <span class="m-list-card__title">${ui.escapeHtml(cap)}</span>
-                  <span class="m-list-card__meta" style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
-                    ${grantedRoles.length === 0 ? '<span class="badge" style="font-size: 9px;">NONE</span>' : grantedRoles.map(r => `<span class="badge badge--${roleColor[r]}" style="font-size: 9px;">${r.toUpperCase()}</span>`).join('')}
-                  </span>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    }
-
     function renderLogs(panel) {
       if (isMobile()) return renderMobileLogs(panel);
       const logs = [
@@ -220,7 +132,7 @@
         { user: 'Hostel Admin',  action: 'Issued compound CP-001 to Lee Wei',     ip: '10.0.0.42',  at: '2 days ago' },
         { user: 'Ahmad Faiz',    action: 'Submitted maintenance M01 (Leaky tap)', ip: '10.0.1.12',  at: '2 days ago' },
         { user: 'Hostel Admin',  action: 'Resolved maintenance M07 (Light bulb)', ip: '10.0.0.42',  at: '5 days ago' },
-        { user: 'Siti Aminah',   action: 'Submitted helpdesk ticket HD-002',      ip: '10.0.1.18',  at: '8 hours ago' },
+        { user: 'Siti Aminah',   action: 'Submitted maintenance request M02',     ip: '10.0.1.18',  at: '8 hours ago' },
         { user: 'Hostel Admin',  action: 'Logged in',                              ip: '10.0.0.42',  at: '8 hours ago' }
       ];
       panel.innerHTML = `
@@ -268,7 +180,7 @@
         { user: 'Hostel Admin',  action: 'Issued compound CP-001 to Lee Wei',     ip: '10.0.0.42',  at: '2 days ago' },
         { user: 'Ahmad Faiz',    action: 'Submitted maintenance M01 (Leaky tap)', ip: '10.0.1.12',  at: '2 days ago' },
         { user: 'Hostel Admin',  action: 'Resolved maintenance M07 (Light bulb)', ip: '10.0.0.42',  at: '5 days ago' },
-        { user: 'Siti Aminah',   action: 'Submitted helpdesk ticket HD-002',      ip: '10.0.1.18',  at: '8 hours ago' },
+        { user: 'Siti Aminah',   action: 'Submitted maintenance request M02',     ip: '10.0.1.18',  at: '8 hours ago' },
         { user: 'Hostel Admin',  action: 'Logged in',                              ip: '10.0.0.42',  at: '8 hours ago' }
       ];
 
