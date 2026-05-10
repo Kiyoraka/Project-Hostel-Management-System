@@ -1,8 +1,13 @@
 /* =====================================================================
    driver-scan.js — Driver displays a fresh time-bound QR for students to scan
-   (Direction flipped: driver-shows / student-scans / driver = pickup authority)
+   (Direction: driver-shows / student-scans / driver = pickup authority)
    File kept under the same name for HTML script-tag continuity; the route is
    still /scan from the URL standpoint, but the tab now shows "My QR".
+
+   Round 6: trip-driven model. Active window picks the class whose pickup
+   window is open. QR payload anchors classId (no scheduleId). Expected
+   students come from enrollments joined to that class. Boarded list filters
+   pickups by classId.
    ===================================================================== */
 
 (function () {
@@ -25,13 +30,16 @@
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const now = new Date();
     const todayDay = days[now.getDay()];
-    const todaySchedules = store.filter('schedules', s => s.day === todayDay)
+
+    const allEnrollments = store.readAll('enrollments');
+    const enrolledClassIds = new Set(allEnrollments.map(e => e.classId));
+    const todayClasses = store.filter('classes', c => c.day === todayDay && enrolledClassIds.has(c.id))
       .sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
 
-    const activeWindow = todaySchedules.find(s => isWindowActive(s, now));
+    const activeClass = todayClasses.find(c => isWindowActive(c, now));
 
-    if (!activeWindow) {
-      const next = todaySchedules.find(s => timeToMin(s.startTime) > now.getHours() * 60 + now.getMinutes());
+    if (!activeClass) {
+      const next = todayClasses.find(c => timeToMin(c.startTime) > now.getHours() * 60 + now.getMinutes());
       content.innerHTML = `
         <div class="d-page-h">
           <div class="d-page-h__title">My Pickup QR</div>
@@ -40,27 +48,26 @@
         <div class="empty-state" style="padding: 40px 20px;">
           <i class="fa-solid fa-clock"></i>
           <h3>No active pickup window</h3>
-          <p>${next ? 'Next pickup at <strong>' + ui.escapeHtml(next.startTime) + '</strong> for ' + ui.escapeHtml(classLabel(next.classId)) + '. The QR opens 15 min before class.' : 'No more pickups today.'}</p>
+          <p>${next ? 'Next pickup at <strong>' + ui.escapeHtml(next.startTime) + '</strong> for ' + ui.escapeHtml(next.name) + '. The QR opens 15 min before class.' : 'No more pickups today.'}</p>
         </div>
       `;
       return;
     }
 
-    const expectedStudents = store.filter('schedules',
-      s => s.id === activeWindow.id || (s.day === activeWindow.day && s.startTime === activeWindow.startTime)
-    );
-    let payload = await issueQr(activeWindow, currentUser);
+    const expectedStudents = allEnrollments.filter(e => e.classId === activeClass.id);
+    const pickupLocations = [...new Set(expectedStudents.map(e => e.pickupLocation))].join(' / ');
+    let payload = await issueQr(activeClass, currentUser);
 
     content.innerHTML = `
       <div class="d-page-h">
         <div class="d-page-h__title">My Pickup QR</div>
-        <div class="d-page-h__sub">${ui.escapeHtml(activeWindow.startTime)} · ${ui.escapeHtml(classLabel(activeWindow.classId))}</div>
+        <div class="d-page-h__sub">${ui.escapeHtml(activeClass.startTime)} · ${ui.escapeHtml(activeClass.name)}</div>
       </div>
 
       <div class="qr-card" style="margin-bottom: 16px;">
         <div class="qr-card__qr" id="dr-qr-target"></div>
-        <div class="qr-card__class">${ui.escapeHtml(classLabel(activeWindow.classId))}</div>
-        <div class="qr-card__pickup"><i class="fa-solid fa-location-dot"></i> ${ui.escapeHtml(activeWindow.pickupLocation)}</div>
+        <div class="qr-card__class">${ui.escapeHtml(activeClass.name)}</div>
+        <div class="qr-card__pickup"><i class="fa-solid fa-location-dot"></i> ${ui.escapeHtml(pickupLocations || '—')}</div>
         <div class="qr-card__expires" data-countdown>Expires in <span data-tick>--:--</span></div>
         <div class="qr-card__hint">Show this to boarding students. Each student scans to confirm they're on the ride.</div>
         <div class="qr-card__actions">
@@ -70,7 +77,7 @@
 
       <div class="scanner-context" style="margin-top: 8px;">
         <strong>Expected students (${expectedStudents.length}):</strong><br>
-        ${expectedStudents.map(s => '<span style="display:inline-block; margin: 2px 4px 0 0; padding: 3px 10px; background: var(--brand-tint); border-radius: 999px; font-size: 12px; color: var(--brand-ink);">' + ui.escapeHtml(s.studentId) + '</span>').join('')}
+        ${expectedStudents.map(e => '<span style="display:inline-block; margin: 2px 4px 0 0; padding: 3px 10px; background: var(--brand-tint); border-radius: 999px; font-size: 12px; color: var(--brand-ink);">' + ui.escapeHtml(e.studentId) + '</span>').join('')}
       </div>
 
       <div class="section-divider">Boarded so far</div>
@@ -79,11 +86,11 @@
 
     drawQrInto(content.querySelector('#dr-qr-target'), payload);
     startQrTimer(content, payload);
-    paintBoardedList(content, activeWindow);
+    paintBoardedList(content, activeClass);
 
     content.querySelector('[data-refresh]').addEventListener('click', async () => {
       stopQrTimer();
-      payload = await issueQr(activeWindow, currentUser);
+      payload = await issueQr(activeClass, currentUser);
       drawQrInto(content.querySelector('#dr-qr-target'), payload);
       startQrTimer(content, payload);
       ui.toast('QR refreshed.', 'success', 1200);
@@ -93,19 +100,18 @@
     const boardTimer = setInterval(() => {
       if (!document.body.contains(content)) { clearInterval(boardTimer); return; }
       if (window.location.hash !== '#/scan') { clearInterval(boardTimer); return; }
-      paintBoardedList(content, activeWindow);
+      paintBoardedList(content, activeClass);
     }, 3000);
   }
 
-  async function issueQr(schedule, currentUser) {
+  async function issueQr(cls, currentUser) {
     const issuedAt = Date.now();
     const expiresAt = issuedAt + QR_VALIDITY_MIN * 60 * 1000;
     const today = new Date();
     const classDate = today.toISOString().slice(0, 10);
     const payload = {
       driverId: currentUser.id,
-      scheduleId: schedule.id,
-      classId: schedule.classId,
+      classId: cls.id,
       classDate,
       issuedAt,
       expiresAt
@@ -155,12 +161,12 @@
     if (qrTimer) { clearInterval(qrTimer); qrTimer = null; }
   }
 
-  function paintBoardedList(content, activeWindow) {
+  function paintBoardedList(content, activeClass) {
     const wrap = content.querySelector('#dr-boarded-list');
     if (!wrap) return;
     const today = new Date().toISOString().slice(0, 10);
     const boarded = store.filter('pickups',
-      p => p.scheduleId === activeWindow.id && p.date === today && p.status === 'completed'
+      p => p.classId === activeClass.id && p.date === today && p.status === 'completed'
     );
     if (boarded.length === 0) {
       wrap.innerHTML = '<div class="empty-state" style="padding: 24px; font-size: 13px;"><i class="fa-solid fa-user-clock"></i><br>Waiting for students to scan...</div>';
@@ -175,10 +181,10 @@
     `).join('');
   }
 
-  function isWindowActive(s, now) {
+  function isWindowActive(cls, now) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    if (s.day !== days[now.getDay()]) return false;
-    const [h, m] = s.startTime.split(':').map(Number);
+    if (cls.day !== days[now.getDay()]) return false;
+    const [h, m] = cls.startTime.split(':').map(Number);
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m).getTime();
     const open = start - PICKUP_WINDOW_MIN * 60 * 1000;
     return now.getTime() >= open && now.getTime() < start;
@@ -187,10 +193,5 @@
   function timeToMin(t) {
     const [h, m] = t.split(':').map(Number);
     return h * 60 + m;
-  }
-
-  function classLabel(id) {
-    const c = store.findById('classes', id);
-    return c ? c.name : id;
   }
 })();
