@@ -1,12 +1,17 @@
 /* =====================================================================
    admin-transportation.js — Transportation tabbed wrapper (Phase 8)
    Tabs: Overview | Trip Schedule | Trip Status
+
+   Round 6: trip-driven model. Trip Schedule shows classes (master) sorted
+   by weekday + time, with pickup locations derived from enrollments.
+   Trip Status shows pickup history with classId/classLabel preserved.
    ===================================================================== */
 
 (function () {
   'use strict';
 
   function isMobile() { return window.innerWidth <= 900; }
+  const DAY_ORDER = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
 
   const TABS = [
     { id: 'overview', label: 'Overview',       icon: 'fa-gauge' },
@@ -50,16 +55,40 @@
       if (activeTab === 'status')   return renderStatus(panel);
     }
 
+    function tripClasses() {
+      const enrollments = store.readAll('enrollments') || [];
+      const enrolledClassIds = new Set(enrollments.map(e => e.classId));
+      const classes = store.readAll('classes') || [];
+      return classes
+        .filter(c => enrolledClassIds.has(c.id))
+        .sort((a, b) => {
+          const dayDiff = (DAY_ORDER[a.day] || 9) - (DAY_ORDER[b.day] || 9);
+          if (dayDiff !== 0) return dayDiff;
+          return timeToMin(a.startTime) - timeToMin(b.startTime);
+        });
+    }
+
+    function pickupSummary(classId, allEnrollments) {
+      const locs = [...new Set(allEnrollments.filter(e => e.classId === classId).map(e => e.pickupLocation))];
+      return locs.join(' / ') || '—';
+    }
+
+    function todayTripCount() {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const todayDay = days[new Date().getDay()];
+      return tripClasses().filter(c => c.day === todayDay).length;
+    }
+
     function renderOverview(panel) {
       if (isMobile()) return renderMobileOverview(panel);
       const pickups = store.readAll('pickups') || [];
-      const schedules = store.readAll('schedules') || [];
+      const tripsToday = todayTripCount();
       const completed = pickups.filter(p => p.status === 'completed').length;
-      const pending = Math.max(0, schedules.length - completed);
+      const pending = Math.max(0, tripsToday - completed);
       const drivers = auth.listUsers().filter(u => u.role === 'driver').length;
       panel.innerHTML = `
         <div class="kpi-strip" style="grid-template-columns: repeat(4, 1fr); margin-bottom: var(--space-4);">
-          <div class="kpi-tile"><div class="kpi-tile__label">Trips Today</div><div class="kpi-tile__value">${schedules.length}</div></div>
+          <div class="kpi-tile"><div class="kpi-tile__label">Trips Today</div><div class="kpi-tile__value">${tripsToday}</div></div>
           <div class="kpi-tile"><div class="kpi-tile__label">Completed</div><div class="kpi-tile__value">${completed}</div></div>
           <div class="kpi-tile"><div class="kpi-tile__label">Pending</div><div class="kpi-tile__value">${pending}</div></div>
           <div class="kpi-tile"><div class="kpi-tile__label">Active Drivers</div><div class="kpi-tile__value">${drivers}</div></div>
@@ -70,7 +99,7 @@
             ${pickups.map(p => `
               <li class="recent-list__item">
                 <div class="recent-list__main">
-                  <span class="recent-list__title">${ui.escapeHtml(p.classLabel)} pickup</span>
+                  <span class="recent-list__title">${ui.escapeHtml(p.classLabel || classLabelFor(p.classId))} pickup</span>
                   <span class="recent-list__meta">${p.studentCount} students &middot; ${ui.escapeHtml(p.status)}</span>
                 </div>
                 <span class="recent-list__time">${ui.escapeHtml(p.date)}</span>
@@ -83,22 +112,21 @@
 
     function renderMobileOverview(panel) {
       const pickups = store.readAll('pickups') || [];
-      const schedules = store.readAll('schedules') || [];
+      const tripsToday = todayTripCount();
       const completed = pickups.filter(p => p.status === 'completed').length;
-      const pending = Math.max(0, schedules.length - completed);
+      const pending = Math.max(0, tripsToday - completed);
       const drivers = auth.listUsers().filter(u => u.role === 'driver').length;
-      const total = schedules.length;
 
       panel.innerHTML = `
         <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
           <div class="m-greeting__hello">Transportation</div>
-          <div class="m-greeting__date">${total} trips scheduled today</div>
+          <div class="m-greeting__date">${tripsToday} trips scheduled today</div>
         </div>
 
         <div class="m-stats-row" style="grid-template-columns: repeat(2, 1fr);">
           <div class="m-stat-card">
             <div class="m-stat-card__label">Trips Today</div>
-            <div class="m-stat-card__value">${total}</div>
+            <div class="m-stat-card__value">${tripsToday}</div>
             <div class="m-stat-card__delta">scheduled</div>
           </div>
           <div class="m-stat-card">
@@ -124,7 +152,7 @@
             <div class="m-list-card__row">
               <i class="fa-solid fa-van-shuttle activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
               <div class="m-list-card__main">
-                <span class="m-list-card__title">${ui.escapeHtml(p.classLabel)} pickup</span>
+                <span class="m-list-card__title">${ui.escapeHtml(p.classLabel || classLabelFor(p.classId))} pickup</span>
                 <span class="m-list-card__meta">${p.studentCount} student${p.studentCount === 1 ? '' : 's'} &middot; ${ui.escapeHtml(p.status)}</span>
               </div>
               <span class="m-list-card__time">${ui.escapeHtml(p.date)}</span>
@@ -137,7 +165,8 @@
 
     function renderSchedule(panel) {
       if (isMobile()) return renderMobileSchedule(panel);
-      const schedules = store.readAll('schedules') || [];
+      const enrollments = store.readAll('enrollments') || [];
+      const classes = tripClasses();
       const driver = auth.listUsers().find(u => u.role === 'driver') || { name: 'Pak Lim' };
       panel.innerHTML = `
         <div class="card card-pad stub-section">
@@ -148,14 +177,15 @@
           <div class="stub-section__layout">
             <div>
               <table class="table">
-                <thead><tr><th>Day</th><th>Time</th><th>Class</th><th>Pickup</th><th>Driver</th><th>Status</th></tr></thead>
+                <thead><tr><th>Day</th><th>Time</th><th>Class</th><th>Pickup</th><th>Riders</th><th>Driver</th><th>Status</th></tr></thead>
                 <tbody>
-                  ${schedules.map(s => `
+                  ${classes.map(c => `
                     <tr>
-                      <td>${ui.escapeHtml(s.day)}</td>
-                      <td>${ui.escapeHtml(s.startTime)}</td>
-                      <td>${ui.escapeHtml(s.classLabel || s.classId || '-')}</td>
-                      <td>${ui.escapeHtml(s.pickupLocation)}</td>
+                      <td>${ui.escapeHtml(c.day)}</td>
+                      <td>${ui.escapeHtml(c.startTime)}</td>
+                      <td>${ui.escapeHtml(c.name)}</td>
+                      <td>${ui.escapeHtml(pickupSummary(c.id, enrollments))}</td>
+                      <td>${enrollments.filter(e => e.classId === c.id).length}</td>
                       <td>${ui.escapeHtml(driver.name)}</td>
                       <td><span class="badge badge--success">Active</span></td>
                     </tr>
@@ -178,7 +208,8 @@
     }
 
     function renderMobileSchedule(panel) {
-      const schedules = store.readAll('schedules') || [];
+      const enrollments = store.readAll('enrollments') || [];
+      const classes = tripClasses();
       const driver = auth.listUsers().find(u => u.role === 'driver') || { name: 'Pak Lim' };
 
       panel.innerHTML = `
@@ -189,19 +220,22 @@
           </div>
         </div>
 
-        <div class="m-section-label">Trips This Week <span class="m-carousel-hint">${schedules.length}</span></div>
+        <div class="m-section-label">Trips This Week <span class="m-carousel-hint">${classes.length}</span></div>
         <div class="m-list-card">
-          ${schedules.map(s => `
-            <div class="m-list-card__row">
-              <i class="fa-solid fa-clock activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
-              <div class="m-list-card__main">
-                <span class="m-list-card__title">${ui.escapeHtml(s.day)} &middot; ${ui.escapeHtml(s.startTime)}</span>
-                <span class="m-list-card__meta">${ui.escapeHtml(s.classLabel || s.classId || '-')} &middot; ${ui.escapeHtml(s.pickupLocation)}</span>
-                <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(driver.name)}</span>
+          ${classes.map(c => {
+            const riderCount = enrollments.filter(e => e.classId === c.id).length;
+            return `
+              <div class="m-list-card__row">
+                <i class="fa-solid fa-clock activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
+                <div class="m-list-card__main">
+                  <span class="m-list-card__title">${ui.escapeHtml(c.day)} &middot; ${ui.escapeHtml(c.startTime)}</span>
+                  <span class="m-list-card__meta">${ui.escapeHtml(c.name)} &middot; ${ui.escapeHtml(pickupSummary(c.id, enrollments))}</span>
+                  <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.7;">${ui.escapeHtml(driver.name)} &middot; ${riderCount} rider${riderCount === 1 ? '' : 's'}</span>
+                </div>
+                <span class="badge badge--success" style="font-size: 10px; flex-shrink: 0;">ACTIVE</span>
               </div>
-              <span class="badge badge--success" style="font-size: 10px; flex-shrink: 0;">ACTIVE</span>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `;
     }
@@ -225,7 +259,7 @@
               ${pickups.map(p => `
                 <tr>
                   <td>${ui.escapeHtml(p.id)}</td>
-                  <td>${ui.escapeHtml(p.classLabel)}</td>
+                  <td>${ui.escapeHtml(p.classLabel || classLabelFor(p.classId))}</td>
                   <td>${ui.escapeHtml(p.driverId)}</td>
                   <td>${p.studentCount}</td>
                   <td><span class="badge badge--success">${ui.escapeHtml(p.status)}</span></td>
@@ -272,7 +306,7 @@
             <div class="m-list-card__row">
               <i class="fa-solid fa-van-shuttle activity-feed__icon activity-feed__icon--pickup" aria-hidden="true"></i>
               <div class="m-list-card__main">
-                <span class="m-list-card__title">${ui.escapeHtml(p.id)} &middot; ${ui.escapeHtml(p.classLabel)}</span>
+                <span class="m-list-card__title">${ui.escapeHtml(p.id)} &middot; ${ui.escapeHtml(p.classLabel || classLabelFor(p.classId))}</span>
                 <span class="m-list-card__meta">${ui.escapeHtml(p.driverId)} &middot; ${p.studentCount} student${p.studentCount === 1 ? '' : 's'}</span>
               </div>
               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
@@ -283,6 +317,18 @@
           `).join('')}
         </div>
       `;
+    }
+
+    function classLabelFor(id) {
+      if (!id) return '—';
+      const c = store.findById('classes', id);
+      return c ? c.name : id;
+    }
+
+    function timeToMin(t) {
+      if (!t) return 0;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
     }
 
     render();
