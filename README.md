@@ -158,7 +158,7 @@ Topbar dropdown (Settings + Logout) and bottom nav swap-to-top-on-active-tap beh
 
 The system's defining feature. **Direction: driver shows / student scans** — like a venue check-in. The driver is the pickup authority; the student verifies they're boarding the right ride.
 
-1. **Student enrolls in a class** (just class + pickup location — day & time come from the class catalog itself, the trip-driven model from Round 6)
+1. **Admin enrolls the student in their classes** via Transportation > Enrollments tab (Student × Class × Pickup). The student's My Schedule tab shows the assigned trips read-only — no Add Class, no Delete, just Scan to Board. Round 7 closes the fake-class abuse vector by locking the enrollment write path to admin only.
 2. **15 minutes before class start**, both apps light up:
    - Driver's **My QR** tab activates and renders a fresh QR with a 10-minute validity window
    - Student's schedule row shows a pulsing **NOW** badge with a **Scan to Board** button
@@ -199,6 +199,14 @@ Earlier rounds stored each student's class schedule as an independent `schedules
 - **Trip** is now a derived view: `class on a day with at least one enrollment`. Driver Today reads classes filtered by `c.day === todayDay && enrolledClassIds.has(c.id)`. Admin Trip Schedule reads all enrollment-backed classes sorted by weekday-then-time.
 
 The `schedules` collection is fully retired in render code. A V2 migration (`hms__seeded_v2` localStorage flag in `seed.js`) drops the legacy `hms_schedules` key on first V2 page load and re-seeds classes (now with day/time fields) + enrollments + pickups, so existing demo accounts continue to work without manual reset.
+
+### Round 7: Admin-Only Enrollments
+
+Round 6 left the `enrollments` table self-service — any tenant could enroll themselves in any class from the catalog and ride that bus, regardless of whether they actually take the class. Round 7 locks that down:
+
+- **Tenant My Schedule is read-only.** The [+ Add Class] button and per-row delete are removed. The empty state reads "No classes assigned yet — contact hostel admin." Scan to Board is the only verb students get.
+- **Admin Transportation gets a 4th tab — Enrollments.** Full CRUD: add an enrollment by picking Student × Class × Pickup, edit the pickup location for an existing enrollment, remove an enrollment with confirmation. Duplicate guard prevents enrolling the same student in the same class twice.
+- **Two write surfaces, period.** The enrollments table can only be written from `seed.js` (initial demo data) and `admin-transportation.js` (Enrollments tab). Tenant code reads but never writes. The fake-class abuse vector is closed at the code level — there is no openAddModal in tenant scope to invoke, even from DevTools.
 
 ## Module Coverage (PDMS)
 
