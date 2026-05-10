@@ -136,7 +136,6 @@
 
     function renderComplaints(panel) {
       if (isMobile()) return renderMobileComplaints(panel);
-      const helpdesk = (store.readAll('helpdesk') || []).filter(h => h.category === 'room' || h.category === 'access');
       const facilityComplaints = [
         { id: 'CM-001', resident: 'Ahmad Faiz',   block: 'A', subject: 'Hot water inconsistent in shared bathroom',  reportedAt: '2 days ago', status: 'open' },
         { id: 'CM-002', resident: 'Siti Aminah',  block: 'A', subject: 'Common area lights flickering at night',     reportedAt: '5 days ago', status: 'in_progress' },
@@ -154,7 +153,7 @@
               <table class="table">
                 <thead><tr><th>ID</th><th>Resident</th><th>Block</th><th>Subject</th><th>Status</th><th>Reported</th></tr></thead>
                 <tbody>
-                  ${[...facilityComplaints, ...helpdesk.map(h => ({ id: h.id, resident: h.requester, block: '-', subject: h.subject, reportedAt: ui.formatRelative(h.createdAt), status: h.status }))].map(c => `
+                  ${facilityComplaints.map(c => `
                     <tr>
                       <td>${ui.escapeHtml(c.id)}</td>
                       <td>${ui.escapeHtml(c.resident)}</td>
@@ -182,13 +181,11 @@
     }
 
     function renderMobileComplaints(panel) {
-      const helpdesk = (store.readAll('helpdesk') || []).filter(h => h.category === 'room' || h.category === 'access');
-      const facility = [
+      const merged = [
         { id: 'CM-001', resident: 'Ahmad Faiz',   block: 'A', subject: 'Hot water inconsistent in shared bathroom',  reportedAt: '2 days ago', status: 'open' },
         { id: 'CM-002', resident: 'Siti Aminah',  block: 'A', subject: 'Common area lights flickering at night',     reportedAt: '5 days ago', status: 'in_progress' },
         { id: 'CM-003', resident: 'Lee Wei',      block: 'C', subject: 'Cafeteria seating insufficient at lunch',    reportedAt: '1 week ago', status: 'resolved' }
       ];
-      const merged = [...facility, ...helpdesk.map(h => ({ id: h.id, resident: h.requester, block: '-', subject: h.subject, reportedAt: ui.formatRelative(h.createdAt), status: h.status }))];
 
       panel.innerHTML = `
         <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">

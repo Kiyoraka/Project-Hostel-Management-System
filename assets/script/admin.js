@@ -19,7 +19,6 @@
     '/transportation': 'operations',
     '/billing':        'operations',
     '/staff':          'people',
-    '/helpdesk':       'people',
     '/profile':        'account',
     '/settings':       'account'
   };
@@ -44,8 +43,7 @@
     people: {
       defaultRoute: '/staff',
       items: [
-        { route: '/staff',    label: 'Staff & Users', icon: 'fa-user-tie' },
-        { route: '/helpdesk', label: 'Helpdesk',      icon: 'fa-life-ring' }
+        { route: '/staff',    label: 'Staff & Users', icon: 'fa-user-tie' }
       ]
     },
     account: {
@@ -77,7 +75,6 @@
       '/transportation': initTransportation,
       '/billing':        initBilling,
       '/staff':          initStaff,
-      '/helpdesk':       initHelpdesk,
       '/profile':        initProfile,
       '/settings':       initSettings
     }, '/');
@@ -671,15 +668,6 @@
     setPageTitle('Staff & Users');
     if (typeof window.adminStaffInit === 'function') return window.adminStaffInit({ content: content(), currentUser });
     content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-user-tie"></i><h3>Staff & Users</h3><p>Loading...</p></div>';
-  }
-
-  /* ===================================================================
-     Section: Helpdesk  (Phase 12)
-     =================================================================== */
-  function initHelpdesk() {
-    setPageTitle('Helpdesk');
-    if (typeof window.adminHelpdeskInit === 'function') return window.adminHelpdeskInit({ content: content(), currentUser });
-    content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-life-ring"></i><h3>Helpdesk</h3><p>Loading...</p></div>';
   }
 
   /* ===================================================================

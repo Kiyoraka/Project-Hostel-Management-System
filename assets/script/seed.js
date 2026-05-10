@@ -37,7 +37,6 @@
     seedHostels();
     seedAnnouncements();
     seedAttendance();
-    seedHelpdesk();
     seedPartners();
     seedCompounds();
   }
@@ -285,19 +284,6 @@
       { id: 'AT-004', userId: 'U005', studentName: 'Lee Wei',      studentId: 'STU-2026-0014', event: 'in',  location: 'Block C Lobby', recordedAt: hoursAgo(3),  method: 'manual' },
       { id: 'AT-005', userId: 'U006', studentName: 'Raj Kumar',    studentId: 'STU-2026-0019', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(5),  method: 'manual' },
       { id: 'AT-006', userId: 'U007', studentName: 'Nur Hidayah',  studentId: 'STU-2026-0023', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(10), method: 'manual' }
-    ]);
-  }
-
-  function seedHelpdesk() {
-    if (store.readAll('helpdesk').length > 0) return;
-    const now = Date.now();
-    const hoursAgo = (h) => new Date(now - h * 3600 * 1000).toISOString();
-    const daysAgo = (d) => hoursAgo(d * 24);
-    store.writeAll('helpdesk', [
-      { id: 'HD-001', subject: 'Cant login to portal after password reset', requester: 'Ahmad Faiz',  requesterId: 'U002', category: 'account', priority: 'high',   status: 'open',         assignedTo: 'IT Support',   createdAt: hoursAgo(2), updatedAt: hoursAgo(1) },
-      { id: 'HD-002', subject: 'Lost key fob replacement',                  requester: 'Siti Aminah', requesterId: 'U004', category: 'access',  priority: 'medium', status: 'in_progress',  assignedTo: 'Front Office', createdAt: hoursAgo(8), updatedAt: hoursAgo(4) },
-      { id: 'HD-003', subject: 'Request to change roommate',                requester: 'Lee Wei',     requesterId: 'U005', category: 'room',    priority: 'low',    status: 'open',         assignedTo: null,           createdAt: daysAgo(1),  updatedAt: daysAgo(1) },
-      { id: 'HD-004', subject: 'Receipt not received for April rent',       requester: 'Raj Kumar',   requesterId: 'U006', category: 'billing', priority: 'medium', status: 'resolved',     assignedTo: 'Finance',      createdAt: daysAgo(3),  updatedAt: daysAgo(2) }
     ]);
   }
 
