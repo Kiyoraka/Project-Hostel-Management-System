@@ -413,9 +413,9 @@
               <h4>Coming next</h4>
               <ul>
                 <li>Recurring schedule editor</li>
-                <li>Geofence attendance</li>
                 <li>Driver rotations</li>
                 <li>Capacity planning</li>
+                <li>Trip cancellation alerts</li>
               </ul>
             </aside>
           </div>

@@ -25,7 +25,7 @@
         <div class="section-header">
           <div>
             <div class="section-title">Resident Management</div>
-            <div class="section-subtitle">Tenant directory, records, announcements, geofence attendance, and history</div>
+            <div class="section-subtitle">Tenant directory, records, announcements, attendance log, and history</div>
           </div>
         </div>
 
@@ -300,16 +300,10 @@
         <div class="card card-pad stub-section">
           <div class="stub-section__banner">
             <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; geofence attendance log preview. Live map + real geofence alerts ship in Phase 2.</span>
+            <span>Prototype scope &mdash; manual attendance log preview. Door access integration + automated reports ship in Phase 2.</span>
           </div>
           <div class="stub-section__layout">
             <div>
-              <div style="background: linear-gradient(135deg, var(--brand-tint) 0%, var(--surface-soft) 100%); border-radius: var(--radius-card); height: 220px; display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4); position: relative; overflow: hidden;">
-                <div style="position: absolute; top: 30%; left: 25%; color: var(--brand-primary); font-size: 24px;"><i class="fa-solid fa-location-dot"></i></div>
-                <div style="position: absolute; top: 50%; left: 60%; color: var(--success); font-size: 24px;"><i class="fa-solid fa-location-dot"></i></div>
-                <div style="position: absolute; top: 70%; left: 40%; color: var(--warning); font-size: 24px;"><i class="fa-solid fa-location-dot"></i></div>
-                <div style="color: var(--ink-500); font-size: 13px;">Geofence map placeholder</div>
-              </div>
               <h4 style="margin-top: 0;">Recent Activity</h4>
               <table class="table">
                 <thead><tr><th>Student</th><th>ID</th><th>Event</th><th>Location</th><th>Method</th><th>When</th></tr></thead>
@@ -330,10 +324,10 @@
             <aside class="stub-section__aside">
               <h4>Coming next</h4>
               <ul>
-                <li>Live Mapbox/Leaflet integration</li>
-                <li>Real-time geofence alerts</li>
+                <li>Door access card integration</li>
                 <li>Curfew violation auto-flag</li>
-                <li>Attendance reports</li>
+                <li>Attendance summary reports</li>
+                <li>Per-block headcount dashboard</li>
               </ul>
             </aside>
           </div>
@@ -347,15 +341,8 @@
         <div class="card card-pad stub-section" style="margin-bottom: var(--space-3);">
           <div class="stub-section__banner" style="margin-bottom: 0;">
             <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span>Prototype scope &mdash; live geofence ships in Phase 2.</span>
+            <span>Prototype scope &mdash; manual attendance log. Door access integration ships in Phase 2.</span>
           </div>
-        </div>
-
-        <div style="background: linear-gradient(135deg, var(--brand-tint) 0%, var(--surface-soft) 100%); border-radius: var(--radius-card); height: 160px; display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-4); position: relative; overflow: hidden;">
-          <div style="position: absolute; top: 30%; left: 25%; color: var(--brand-primary); font-size: 22px;"><i class="fa-solid fa-location-dot"></i></div>
-          <div style="position: absolute; top: 55%; left: 60%; color: var(--success); font-size: 22px;"><i class="fa-solid fa-location-dot"></i></div>
-          <div style="position: absolute; top: 70%; left: 35%; color: var(--warning); font-size: 22px;"><i class="fa-solid fa-location-dot"></i></div>
-          <div style="color: var(--ink-500); font-size: 12px;">Geofence map placeholder</div>
         </div>
 
         <div class="m-section-label">Recent Attendance <span class="m-carousel-hint">${records.length}</span></div>

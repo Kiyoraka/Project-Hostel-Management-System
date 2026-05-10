@@ -279,12 +279,12 @@
     const now = Date.now();
     const hoursAgo = (h) => new Date(now - h * 3600 * 1000).toISOString();
     store.writeAll('attendance', [
-      { id: 'AT-001', userId: 'U002', studentName: 'Ahmad Faiz',   studentId: 'STU-2026-0007', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(1),  method: 'geofence' },
-      { id: 'AT-002', userId: 'U002', studentName: 'Ahmad Faiz',   studentId: 'STU-2026-0007', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(8),  method: 'geofence' },
-      { id: 'AT-003', userId: 'U004', studentName: 'Siti Aminah',  studentId: 'STU-2026-0011', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(2),  method: 'geofence' },
+      { id: 'AT-001', userId: 'U002', studentName: 'Ahmad Faiz',   studentId: 'STU-2026-0007', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(1),  method: 'manual' },
+      { id: 'AT-002', userId: 'U002', studentName: 'Ahmad Faiz',   studentId: 'STU-2026-0007', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(8),  method: 'manual' },
+      { id: 'AT-003', userId: 'U004', studentName: 'Siti Aminah',  studentId: 'STU-2026-0011', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(2),  method: 'manual' },
       { id: 'AT-004', userId: 'U005', studentName: 'Lee Wei',      studentId: 'STU-2026-0014', event: 'in',  location: 'Block C Lobby', recordedAt: hoursAgo(3),  method: 'manual' },
-      { id: 'AT-005', userId: 'U006', studentName: 'Raj Kumar',    studentId: 'STU-2026-0019', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(5),  method: 'geofence' },
-      { id: 'AT-006', userId: 'U007', studentName: 'Nur Hidayah',  studentId: 'STU-2026-0023', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(10), method: 'geofence' }
+      { id: 'AT-005', userId: 'U006', studentName: 'Raj Kumar',    studentId: 'STU-2026-0019', event: 'out', location: 'Block A Lobby', recordedAt: hoursAgo(5),  method: 'manual' },
+      { id: 'AT-006', userId: 'U007', studentName: 'Nur Hidayah',  studentId: 'STU-2026-0023', event: 'in',  location: 'Block A Lobby', recordedAt: hoursAgo(10), method: 'manual' }
     ]);
   }
 
