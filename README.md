@@ -158,7 +158,7 @@ Topbar dropdown (Settings + Logout) and bottom nav swap-to-top-on-active-tap beh
 
 The system's defining feature. **Direction: driver shows / student scans** — like a venue check-in. The driver is the pickup authority; the student verifies they're boarding the right ride.
 
-1. **Student schedules a class** (day, start time, class, pickup location)
+1. **Student enrolls in a class** (just class + pickup location — day & time come from the class catalog itself, the trip-driven model from Round 6)
 2. **15 minutes before class start**, both apps light up:
    - Driver's **My QR** tab activates and renders a fresh QR with a 10-minute validity window
    - Student's schedule row shows a pulsing **NOW** badge with a **Scan to Board** button
@@ -166,7 +166,6 @@ The system's defining feature. **Direction: driver shows / student scans** — l
    ```json
    {
      "driverId":   "U003",
-     "scheduleId": "SCH-Tue-1430",
      "classId":    "CLS-SE",
      "classDate":  "2026-04-30",
      "issuedAt":   1714476120000,
@@ -174,20 +173,32 @@ The system's defining feature. **Direction: driver shows / student scans** — l
      "sig":        "a3f9..."
    }
    ```
-   The `sig` is a SHA-256 hash of the rest of the payload — tamper detection.
+   The `sig` is a SHA-256 hash of the rest of the payload — tamper detection. Note: the QR is `classId`-keyed (one QR per trip, shared by every enrolled rider), not student-keyed.
 4. **Student taps Scan to Board** → camera starts
-5. **Student aims at driver's QR** → 5 validation rules fire:
+5. **Student aims at driver's QR** → 7 validation rules fire:
    1. JSON parses cleanly
    2. Signature matches the hash of the payload
    3. Now is between `issuedAt` and `expiresAt`
-   4. `scheduleId` belongs to ME and is for today with an open pickup window
-   5. `driverId` is a registered driver
-   6. (bonus) Student hasn't already boarded this pickup today
-6. **All pass** → green "You're on board" overlay → student taps **Confirm boarding** → logged to `pickups` store
+   4. `classId` resolves to a class that meets today
+   5. The scanning student is enrolled in that class
+   6. The enrollment's pickup window is open
+   7. `driverId` is a registered driver
+   8. (bonus) Student hasn't already boarded this pickup today
+6. **All pass** → green "You're on board" overlay → student taps **Confirm boarding** → logged to `pickups` store with `enrollmentId` + `classId` join keys
 7. **Any fail** → red "Cannot board" overlay with the specific reason
 8. **Driver sees boarded students appear live** in the QR view as students confirm
 
 Each driver QR is a single, time-bound, signed token shared by all students of that pickup window.
+
+### Round 6: Trip-Driven Schedule Model
+
+Earlier rounds stored each student's class schedule as an independent `schedules` row carrying day + time + classId. The bus trip emerged from coincidence — multiple `schedules` rows happening to share the same `day + startTime`. Round 6 separates concerns:
+
+- **`classes`** is the master catalog. Each class row owns `day` + `startTime` (Math 101 → Mon 09:00, SE → Tue 14:30, etc.). Single source of truth for *when class meets*.
+- **`enrollments`** is the per-student membership table. Just `{userId, studentId, classId, pickupLocation}` — no day, no time. Day/time are derived through the class join at render time.
+- **Trip** is now a derived view: `class on a day with at least one enrollment`. Driver Today reads classes filtered by `c.day === todayDay && enrolledClassIds.has(c.id)`. Admin Trip Schedule reads all enrollment-backed classes sorted by weekday-then-time.
+
+The `schedules` collection is fully retired in render code. A V2 migration (`hms__seeded_v2` localStorage flag in `seed.js`) drops the legacy `hms_schedules` key on first V2 page load and re-seeds classes (now with day/time fields) + enrollments + pickups, so existing demo accounts continue to work without manual reset.
 
 ## Module Coverage (PDMS)
 
