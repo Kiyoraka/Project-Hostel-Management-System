@@ -42,7 +42,7 @@ A modern student hostel management web application built as **pure vanilla HTML 
 │   │   ├── admin-{users,rooms,rentals,maintenance,settings}.js   Original 5 sections (still active)
 │   │   ├── admin-{hostel,residents,transportation,billing,staff}.js   Tabbed PDMS wrappers
 │   │   ├── admin-maintenance-tabbed.js  Maintenance 4-tab wrapper
-│   │   ├── admin-{helpdesk,profile}.js  Single-view PDMS modules
+│   │   ├── admin-profile.js             Single-view profile module
 │   │   ├── tenant.js           Tenant router + chrome
 │   │   ├── tenant-{home,room,schedule,maintenance,payments,settings}.js
 │   │   ├── driver.js           Driver router + chrome
@@ -86,12 +86,11 @@ The admin dashboard is structured around the client's PDMS Hostel Management mod
 
 - **Dashboard** — 10 widgets across 3 rows: 6-tile KPI strip (Total Beds, Occupied, Available, Occupancy Rate, Outstanding Payments, Pending Maintenance), Room Status mini-grid + Payment Status donut, Occupancy Summary trend chart + Recent Activity feed
 - **Hostel Management** *(tabbed)* — Overview (Hostel List) / Room & Beds (existing rich grid) / Check In/Out (form + recent table) / Appointments (timeline)
-- **Resident Management** *(tabbed)* — Overview (existing user table) / Record (resident card grid) / Announcement (list + compose) / Attendance/GeoFencing (map + log) / History (timeline)
+- **Resident Management** *(tabbed)* — Overview (existing user table) / Record (resident card grid) / Announcement (list + compose) / Attendance (manual log) / History (timeline)
 - **Maintenance** *(tabbed)* — Overview (existing reports + drawer) / Complaints (facility complaints) / Work Order (vendor tasks) / Records (resolved archive)
 - **Transportation** *(tabbed)* — Overview (KPI strip) / Trip Schedule (table) / Trip Status (live reports)
 - **Billings & Payment** *(tabbed)* — Overview (KPI strip) / Invoices (existing rentals) / Overdue (filtered view) / Compounds (fines) / Statistics (revenue chart)
-- **Staff & Users** *(tabbed)* — Staff List (admins + drivers) / Roles & Permission (matrix) / Activity Logs (audit feed) / University Partners (MOU cards)
-- **Helpdesk** — single-view ticket queue with KPI strip + table + drawer detail
+- **Staff & Users** *(tabbed)* — Staff List (admins + drivers) / Activity Logs (audit feed) / University Partners (MOU cards)
 - **Profile** — single-view account card with Activity + Preferences cards
 - **Settings** — Profile / Password / Payment Settings / Hostel Info tabs (existing)
 
@@ -108,15 +107,14 @@ When the admin dashboard opens at narrow widths (phone, tablet portrait, or DevT
   - **Dashboard (Main)** — time-aware greeting, hero Occupancy card with 40px primary metric + thick progress bar, 2-col compact stats (Outstanding + Pending Maintenance), ALL-CAPS section labels (iOS pattern), swipeable Insights carousel for Payment Status / Occupancy Trend / Recent Activity (with pager dots), and a full Recent Activity list card below for complete reading.
   - **Hostel Management (Operations)** — per-tab mobile renders: Overview shows greeting + hero Occupancy card + 2-col Capacity/Established + Property Info list-card + Amenities chip grid; Room & Beds shows horizontal Block pills (A/B/C) + Room Status mini-grid + per-block room list-card; Check In/Out shows stacked form with segmented Action control + full-width Submit + Recent Check-Ins list + Coming next stub; Appointments shows full-width Book CTA + time-prefixed appointments list-card + Coming next stub.
   - **Resident Management (Operations)** — Overview shows greeting + hero (Total Residents) + 2-col stats + All Tenants list-card; Record shows resident records list-card with avatar circles; Announcement shows full-width [+ New] CTA + announcements list-card with HIGH priority badge; Attendance shows compact gradient map placeholder + recent attendance list-card with IN/OUT badges; History shows resident timeline list-card with kind-based icons.
-  - **Maintenance (Operations)** — Overview shows hero (Pending count) + 2-col stats + Maintenance Reports list-card built directly from store; Complaints shows merged facility + helpdesk list-card with status badges; Work Order shows full-width [+ New] CTA + active work orders list-card with priority badges; Records shows resolved archive list-card with check icons.
+  - **Maintenance (Operations)** — Overview shows hero (Pending count) + 2-col stats + Maintenance Reports list-card built directly from store; Complaints shows facility complaints list-card with status badges; Work Order shows full-width [+ New] CTA + active work orders list-card with priority badges; Records shows resolved archive list-card with check icons.
   - **Transportation (Operations)** — Overview shows greeting + 2x2 stat grid (Trips Today/Completed/Pending/Drivers) + Today's Activity list-card; Trip Schedule shows trips-this-week list-card with clock icons + ACTIVE badges; Trip Status shows full-width Refresh CTA + live trip reports list-card with status badges color-coded by completion state.
   - **Billings & Payment (Operations)** — Overview shows greeting + hero (Total Billed RM with collection-rate bar) + 2-col stats (Collection % / Outstanding) + Recent Payments list-card; Invoices shows full payment list-card built directly from store with status badges; Overdue shows overdue-only filtered list-card with inline Send Reminder buttons; Compounds shows full-width [+ Issue] CTA + fines list-card; Statistics shows mobile bar chart (canvas#billing-stats-chart-mobile) + Coming Next stub.
-  - **Staff & Users (People)** — Staff List shows greeting + 2-col stats (Admins/Drivers) + [+ Add Staff] CTA + staff list-card with avatar circles + role badges; Roles & Permission shows permission matrix as per-capability list-card with role chips inline; Activity Logs shows audit list-card with monospace IPs; University Partners shows shortName-chip list-card with MOU dates.
-  - **Helpdesk (People)** — Single-view: greeting + hero (Open Tickets count with resolved-rate bar) + 2-col stats (In Progress / Resolved) + [+ New Ticket] CTA + tickets list-card with priority icons (circle-exclamation/circle-dot/circle) + status badges. Tap row opens detail drawer.
+  - **Staff & Users (People)** — Staff List shows greeting + 2-col stats (Admins/Drivers) + [+ Add Staff] CTA + staff list-card with avatar circles + role badges; Activity Logs shows audit list-card with monospace IPs; University Partners shows shortName-chip list-card with MOU dates.
   - **Profile (Account)** — Centered hero profile card (avatar + name + role + email + Edit btn) + Account Info list-card (name/email/phone/role/member-since) + Activity list-card (last login / count / action / IP / session) + Preferences list-card with 4 interactive rows (email notifications / SMS / theme select / language select).
   - **Settings (Account)** — Greeting + scroll-snap tab bar + active tab name as section label + full-width stacked form (max-width constraint removed) for the 4 tabs (Profile / Password / Payment Settings / Hostel Info). Form fields collapse to 1-col + Save buttons full-width on mobile.
 
-**All 10 admin routes (26 tabs total) now have dedicated mobile-native renders.** No remaining CSS-shrunk-desktop pages.
+**All 9 admin routes (24 tabs total) now have dedicated mobile-native renders.** No remaining CSS-shrunk-desktop pages.
 - **Content adaptations on other pages** — section tabs become horizontal scroll-snap; wide tables scroll horizontally inside their wrappers; two-column layouts collapse to single column.
 - **Auto-swap on resize** — if the browser is resized across the 900px boundary, the active section re-renders (debounced 150ms) so layout changes instantly without manual reload.
 - **Safe area** — `env(safe-area-inset-bottom)` honored so the bottom nav clears the iPhone home indicator.
@@ -229,7 +227,7 @@ This is a hardcoded prototype demonstrating the PDMS Hostel Management module st
 | Resident Management | Overview (all residents) | Live |
 | Resident Management | Record | Demo |
 | Resident Management | Announcement | Demo |
-| Resident Management | Attendance / GeoFencing | Demo + Planned (live map) |
+| Resident Management | Attendance log | Demo |
 | Resident Management | History | Demo |
 | Maintenance | Overview | Live |
 | Maintenance | Complaints | Demo |
@@ -244,10 +242,8 @@ This is a hardcoded prototype demonstrating the PDMS Hostel Management module st
 | Billings & Payment | Compounds | Demo |
 | Billings & Payment | Statistics | Demo |
 | Staff & Users | Staff List | Live |
-| Staff & Users | Roles & Permission | Demo |
 | Staff & Users | Activity Logs | Demo |
 | Staff & Users | University Partners | Demo |
-| Helpdesk | Ticket queue | Demo |
 | Profile | Account info / Activity / Preferences | Live (uses current session) |
 | Settings | Profile / Password / Payment Settings / Hostel Info | Live |
 
