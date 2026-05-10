@@ -37,7 +37,7 @@
     content.innerHTML = `
       <div class="m-greeting" style="padding: var(--space-2) var(--space-2) var(--space-3);">
         <div class="m-greeting__hello">My Class Schedule</div>
-        <div class="m-greeting__date">Pickup opens ${PICKUP_WINDOW_MIN} min before class. Scan driver's QR to board.</div>
+        <div class="m-greeting__date">Your assigned schedule. Pickup opens ${PICKUP_WINDOW_MIN} min before class. Scan driver's QR to board.</div>
       </div>
 
       ${activeCount > 0 ? `
@@ -63,13 +63,9 @@
         </div>
       </div>
 
-      <button type="button" class="btn btn-primary" data-add-class style="width: 100%; padding: 12px; margin-bottom: var(--space-4);">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i>&nbsp;Add Class
-      </button>
-
       <div class="m-section-label">My Classes <span class="m-carousel-hint">${enrollments.length}</span></div>
       <div class="m-list-card">
-        ${enrollments.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No classes yet — tap Add Class</div>'
+        ${enrollments.length === 0 ? '<div class="m-list-card__row" style="justify-content: center; color: var(--ink-500); padding: var(--space-6);">No classes assigned yet — contact hostel admin</div>'
           : enrollments.map(e => {
             const cls = classOf(e);
             const day = cls ? cls.day : '—';
@@ -83,11 +79,10 @@
                   <span class="m-list-card__title">${ui.escapeHtml(day)} &middot; ${ui.escapeHtml(startTime)}</span>
                   <span class="m-list-card__meta">${ui.escapeHtml(classLabel(e.classId))}</span>
                   <span class="m-list-card__meta" style="font-size: 11px; opacity: 0.8;"><i class="fa-solid fa-location-dot"></i>&nbsp;${ui.escapeHtml(e.pickupLocation)}</span>
-                  <div style="margin-top: 8px; display: flex; gap: 6px;">
+                  <div style="margin-top: 8px;">
                     ${boarded ? '<button class="btn btn-ghost btn-sm" disabled><i class="fa-solid fa-check"></i>&nbsp;Boarded</button>'
                       : active ? '<button class="btn btn-primary btn-sm" data-scan="' + ui.escapeHtml(e.id) + '"><i class="fa-solid fa-qrcode"></i>&nbsp;Scan to Board</button>'
                       : '<button class="btn btn-ghost btn-sm" disabled><i class="fa-solid fa-qrcode"></i>&nbsp;Wait for window</button>'}
-                    <button class="btn btn-ghost btn-sm" data-delete="${ui.escapeHtml(e.id)}"><i class="fa-solid fa-trash"></i></button>
                   </div>
                 </div>
                 ${boarded ? '<span class="badge badge--success" style="font-size: 10px; flex-shrink: 0;">BOARDED</span>'
@@ -99,17 +94,8 @@
       </div>
     `;
 
-    content.querySelector('[data-add-class]')?.addEventListener('click', () => openAddModal(content, currentUser));
     content.querySelectorAll('[data-scan]').forEach(b => {
       b.addEventListener('click', () => renderScanner(content, currentUser, b.dataset.scan));
-    });
-    content.querySelectorAll('[data-delete]').forEach(b => {
-      b.addEventListener('click', async () => {
-        const ok = await ui.confirmDialog({ title: 'Remove class', message: 'Remove this class from your schedule?', danger: true, confirmText: 'Remove' });
-        if (!ok) return;
-        store.remove('enrollments', b.dataset.delete);
-        renderMobileList(content, currentUser);
-      });
     });
   }
 
@@ -122,11 +108,8 @@
       <div class="section-header">
         <div>
           <div class="section-title">My Class Schedule</div>
-          <div class="section-subtitle">Pickup window opens ${PICKUP_WINDOW_MIN} min before class start. Scan the driver's QR to board.</div>
+          <div class="section-subtitle">Your assigned schedule. Pickup window opens ${PICKUP_WINDOW_MIN} min before class start. Scan the driver's QR to board.</div>
         </div>
-        <button type="button" class="btn btn-primary" data-add-class>
-          <i class="fa-solid fa-plus"></i> Add Class
-        </button>
       </div>
 
       <div class="table-wrap">
@@ -138,12 +121,12 @@
               <th>Time</th>
               <th>Pickup</th>
               <th>Status</th>
-              <th style="text-align:right;">Actions</th>
+              <th style="text-align:right;">Action</th>
             </tr>
           </thead>
           <tbody>
             ${enrollments.length === 0
-              ? '<tr><td colspan="6" style="text-align:center; padding: 32px; color: var(--ink-500);">No classes yet — click Add Class</td></tr>'
+              ? '<tr><td colspan="6" style="text-align:center; padding: 32px; color: var(--ink-500);">No classes assigned yet — contact hostel admin</td></tr>'
               : enrollments.map(e => {
                 const cls = classOf(e);
                 const day = cls ? cls.day : '—';
@@ -167,7 +150,6 @@
                         : active
                           ? '<button class="btn btn-primary btn-sm" data-scan="' + e.id + '"><i class="fa-solid fa-qrcode"></i> Scan to Board</button>'
                           : '<button class="btn btn-ghost btn-sm" disabled title="Available during pickup window"><i class="fa-solid fa-qrcode"></i></button>'}
-                      <button class="btn btn-ghost btn-sm" data-delete="${e.id}"><i class="fa-solid fa-trash"></i></button>
                     </td>
                   </tr>
                 `;
@@ -177,17 +159,8 @@
       </div>
     `;
 
-    content.querySelector('[data-add-class]')?.addEventListener('click', () => openAddModal(content, currentUser));
     content.querySelectorAll('[data-scan]').forEach(b => {
       b.addEventListener('click', () => renderScanner(content, currentUser, b.dataset.scan));
-    });
-    content.querySelectorAll('[data-delete]').forEach(b => {
-      b.addEventListener('click', async () => {
-        const ok = await ui.confirmDialog({ title: 'Remove class', message: 'Remove this class from your schedule?', danger: true, confirmText: 'Remove' });
-        if (!ok) return;
-        store.remove('enrollments', b.dataset.delete);
-        renderList(content, currentUser);
-      });
     });
   }
 
@@ -398,64 +371,5 @@
   function classLabel(id) {
     const c = store.findById('classes', id);
     return c ? c.name : id;
-  }
-
-  function openAddModal(content, currentUser) {
-    const allClasses = store.readAll('classes');
-    const myEnrollments = store.filter('enrollments', e => e.userId === currentUser.id);
-    const enrolledClassIds = new Set(myEnrollments.map(e => e.classId));
-    const availableClasses = allClasses.filter(c => !enrolledClassIds.has(c.id));
-
-    const body = document.createElement('div');
-    body.innerHTML = `
-      <form class="schedule-form">
-        ${availableClasses.length === 0 ? `
-          <p class="text-mute" style="text-align: center; padding: var(--space-4);">
-            You are already enrolled in every available class.
-          </p>
-        ` : `
-          <div class="field">
-            <label class="field-label" for="sf-class">Class</label>
-            <select class="select" id="sf-class" name="classId" required>
-              ${availableClasses.map(c => `<option value="${ui.escapeHtml(c.id)}">${ui.escapeHtml(c.name)} (${ui.escapeHtml(c.code)}) — ${ui.escapeHtml(c.day)} ${ui.escapeHtml(c.startTime)}</option>`).join('')}
-            </select>
-            <div class="field-help" style="font-size: 12px; color: var(--ink-500); margin-top: 4px;">Day &amp; time come from the class itself.</div>
-          </div>
-          <div class="field">
-            <label class="field-label" for="sf-pickup">Pickup location</label>
-            <select class="select" id="sf-pickup" name="pickupLocation" required>
-              <option>Block A Lobby</option>
-              <option>Block B Lobby</option>
-              <option>Block C Lobby</option>
-              <option>Main Gate</option>
-            </select>
-          </div>
-        `}
-      </form>
-    `;
-    const footer = document.createElement('div');
-    footer.style.display = 'flex'; footer.style.gap = '12px';
-    const cancel = document.createElement('button');
-    cancel.className = 'btn btn-secondary';
-    cancel.textContent = 'Cancel';
-    cancel.addEventListener('click', () => ui.closeModal());
-    const save = document.createElement('button');
-    save.className = 'btn btn-primary';
-    save.textContent = 'Add class';
-    save.disabled = availableClasses.length === 0;
-    save.addEventListener('click', () => {
-      const data = Object.fromEntries(new FormData(body.querySelector('form')).entries());
-      data.userId = currentUser.id;
-      data.studentId = currentUser.studentId;
-      data.status = 'active';
-      data.id = 'EN-' + data.classId.replace(/^CLS-/, '') + '-' + currentUser.id;
-      store.insert('enrollments', data);
-      ui.toast('Class added.', 'success');
-      ui.closeModal();
-      if (isMobile()) renderMobileList(content, currentUser);
-      else renderList(content, currentUser);
-    });
-    footer.appendChild(cancel); footer.appendChild(save);
-    ui.openModal({ title: 'Add class to schedule', body, footer });
   }
 })();
