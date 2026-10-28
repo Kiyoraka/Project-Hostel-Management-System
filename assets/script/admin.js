@@ -18,6 +18,7 @@
     '/maintenance':    'operations',
     '/transportation': 'operations',
     '/billing':        'operations',
+    '/visitor-management': 'operations',
     '/staff':          'people',
     '/profile':        'account',
     '/settings':       'account'
@@ -37,7 +38,8 @@
         { route: '/residents',      label: 'Residents',  icon: 'fa-users' },
         { route: '/maintenance',    label: 'Maint',      icon: 'fa-screwdriver-wrench' },
         { route: '/transportation', label: 'Transport',  icon: 'fa-van-shuttle' },
-        { route: '/billing',        label: 'Billing',    icon: 'fa-money-bill-wave' }
+        { route: '/billing',        label: 'Billing',    icon: 'fa-money-bill-wave' },
+        { route: '/visitor-management', label: 'Visitors', icon: 'fa-user-group' }
       ]
     },
     people: {
@@ -74,6 +76,7 @@
       '/maintenance':    initMaintenance,
       '/transportation': initTransportation,
       '/billing':        initBilling,
+      '/visitor-management': initVisitorManagement,
       '/staff':          initStaff,
       '/profile':        initProfile,
       '/settings':       initSettings
@@ -661,6 +664,11 @@
     content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-money-bill-wave"></i><h3>Billings & Payment</h3><p>Loading...</p></div>';
   }
 
+   function initVisitorManagement() {
+  setPageTitle('Visitor Management');
+  if (typeof window.adminVisitorInit === 'function') return window.adminVisitorInit({ content: content(), currentUser });
+  content().innerHTML = '<div class="empty-state"><i class="fa-solid fa-user-group" aria-hidden="true"></i><h3>Visitor Management</h3><p>Loading...</p></div>';
+}
   /* ===================================================================
      Section: Staff & Users  (tabbed - Phase 11)
      =================================================================== */

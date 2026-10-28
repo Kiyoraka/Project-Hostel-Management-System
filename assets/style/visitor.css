@@ -1,0 +1,108 @@
+
+/* Visitor Management Section */
+#visitor-management {
+  padding: 50px 20px;
+  background: #eff6ff;
+}
+
+#visitor-management .container {
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.12);
+}
+
+#visitor-management .section-heading {
+  text-align: center;
+  color: #1d4ed8;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+#visitor-management .section-subheading {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+#visitor-management .service-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#visitor-management .service-form label {
+  color: #1e293b;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+#visitor-management .service-form input,
+#visitor-management .service-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 15px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+#visitor-management .service-form input:focus,
+#visitor-management .service-form textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+#visitor-management .service-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+#visitor-management .service-form button {
+  margin-top: 15px;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+#visitor-management .service-form button:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+#visitor-management .service-results {
+  margin-top: 25px;
+}
+
+#visitor-management .service-item {
+  margin-top: 12px;
+  padding: 16px;
+  background: #dbeafe;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  #visitor-management {
+    padding: 25px 12px;
+  }
+
+  #visitor-management .container {
+    padding: 20px 15px;
+  }
+
+  #visitor-management .section-heading {
+    font-size: 25px;
+  }
+}
